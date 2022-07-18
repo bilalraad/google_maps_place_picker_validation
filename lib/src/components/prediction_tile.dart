@@ -5,12 +5,13 @@ class PredictionTile extends StatelessWidget {
   final Prediction prediction;
   final ValueChanged<Prediction>? onTap;
 
-  PredictionTile({required this.prediction, this.onTap});
+  const PredictionTile({Key? key, required this.prediction, this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(Icons.location_on),
+      leading: const Icon(Icons.location_on),
       title: RichText(
         text: TextSpan(
           children: _buildPredictionText(context),
@@ -28,14 +29,16 @@ class PredictionTile extends StatelessWidget {
     final List<TextSpan> result = <TextSpan>[];
     final textColor = Theme.of(context).textTheme.bodyText2!.color;
 
-    if (prediction.matchedSubstrings.length > 0) {
+    if (prediction.matchedSubstrings.isNotEmpty) {
       MatchedSubstring matchedSubString = prediction.matchedSubstrings[0];
       // There is no matched string at the beginning.
       if (matchedSubString.offset > 0) {
         result.add(
           TextSpan(
-            text: prediction.description?.substring(0, matchedSubString.offset as int?),
-            style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
+            text: prediction.description
+                ?.substring(0, matchedSubString.offset as int?),
+            style: TextStyle(
+                color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
           ),
         );
       }
@@ -43,17 +46,23 @@ class PredictionTile extends StatelessWidget {
       // Matched strings.
       result.add(
         TextSpan(
-          text: prediction.description?.substring(matchedSubString.offset as int, matchedSubString.offset + matchedSubString.length as int?),
-          style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
+          text: prediction.description?.substring(
+              matchedSubString.offset as int,
+              matchedSubString.offset + matchedSubString.length as int?),
+          style: TextStyle(
+              color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
         ),
       );
 
       // Other strings.
-      if (matchedSubString.offset + matchedSubString.length < (prediction.description?.length ?? 0)) {
+      if (matchedSubString.offset + matchedSubString.length <
+          (prediction.description?.length ?? 0)) {
         result.add(
           TextSpan(
-            text: prediction.description?.substring(matchedSubString.offset + matchedSubString.length as int),
-            style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
+            text: prediction.description?.substring(
+                matchedSubString.offset + matchedSubString.length as int),
+            style: TextStyle(
+                color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
           ),
         );
       }
@@ -62,7 +71,8 @@ class PredictionTile extends StatelessWidget {
       result.add(
         TextSpan(
           text: prediction.description,
-          style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
+          style: TextStyle(
+              color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
         ),
       );
     }

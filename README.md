@@ -1,11 +1,12 @@
 # Google Maps Place Picker - MB edition
+<!-- TODO(masreplay): todo -->
 
 > This README is only slightly changed from its original repo which this repository was forked from. Due to little maintenance by the original author, I want to provide this fork that is not just more maintained, I also add more functionality to it and pick any significant changes and PRs on the original repository, as well.
 > 
 > To install:  
 > 
 > ```
-> flutter pub add google_maps_place_picker_mb
+> flutter pub add google_maps_place_and_shape_pickers
 > ```
 > 
 > ~ _martin-braun_
@@ -159,7 +160,7 @@ Alternatively, you can build your own way with 'selectedPlaceWidgetBuilder' and 
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
+import 'package:google_maps_place_and_shape_pickers/google_maps_place_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:io' show Platform;
 
@@ -439,4 +440,4 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
 > ~ _martin-braun_ 
 
 [tracker]: https://github.com/fysoul17/google_maps_place_picker/issues
-[tracker_fork]: https://github.com/martin-braun/google_maps_place_picker_mb/issues
+[tracker_fork]: https://github.com/martin-braun/google_maps_place_and_shape_pickers/issues

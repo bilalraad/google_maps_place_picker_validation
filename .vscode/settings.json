@@ -7,4 +7,11 @@
 	"files.watcherExclude": {
 		"**/.fvm": true
 	},
+	"cSpell.words": [
+		"ambiguate",
+		"Cooldown",
+		"showintro",
+		"strictbounds",
+		"webservice"
+	],
 }

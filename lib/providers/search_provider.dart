@@ -18,5 +18,6 @@ class SearchProvider extends ChangeNotifier {
 
   set prevSearchTerm(String newValue) {
     _prevSearchTerm = newValue;
+    notifyListeners();
   }
 }

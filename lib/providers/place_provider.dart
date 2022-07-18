@@ -1,13 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_picker_mb/src/models/pick_result.dart';
-import 'package:google_maps_place_picker_mb/src/place_picker.dart';
+import 'package:google_maps_place_and_shape_pickers/src/models/pick_result.dart';
+import 'package:google_maps_place_and_shape_pickers/src/place_picker.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
+// ignore: library_prefixes
 import 'package:location/location.dart' as LocationPlatformInterface;
 import 'package:provider/provider.dart';
 
@@ -43,8 +45,10 @@ class PlaceProvider extends ChangeNotifier {
   LocationAccuracy? desiredAccuracy;
   bool isAutoCompleteSearching = false;
 
-  LocationPlatformInterface.Location location = new LocationPlatformInterface.Location();
-  LocationPlatformInterface.PermissionStatus permissionGranted = LocationPlatformInterface.PermissionStatus.denied;
+  LocationPlatformInterface.Location location =
+      LocationPlatformInterface.Location();
+  LocationPlatformInterface.PermissionStatus permissionGranted =
+      LocationPlatformInterface.PermissionStatus.denied;
   bool isLocationServiceEnabled = false;
 
   Future<void> updateCurrentLocation(bool forceAndroidLocationManager) async {
@@ -59,24 +63,27 @@ class PlaceProvider extends ChangeNotifier {
     permissionGranted = await location.hasPermission();
     try {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted == LocationPlatformInterface.PermissionStatus.granted) {
+      if (permissionGranted ==
+          LocationPlatformInterface.PermissionStatus.granted) {
         currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: desiredAccuracy ?? LocationAccuracy.best);
+            desiredAccuracy: desiredAccuracy ?? LocationAccuracy.best);
       } else {
         currentPosition = null;
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       currentPosition = null;
     }
 
     notifyListeners();
   }
 
-  Position? _currentPoisition;
-  Position? get currentPosition => _currentPoisition;
+  Position? _currentPosition;
+  Position? get currentPosition => _currentPosition;
   set currentPosition(Position? newPosition) {
-    _currentPoisition = newPosition;
+    _currentPosition = newPosition;
     notifyListeners();
   }
 
@@ -127,10 +134,10 @@ class PlaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool _isSeachBarFocused = false;
-  bool get isSearchBarFocused => _isSeachBarFocused;
+  bool _isSearchBarFocused = false;
+  bool get isSearchBarFocused => _isSearchBarFocused;
   set isSearchBarFocused(bool focused) {
-    _isSeachBarFocused = focused;
+    _isSearchBarFocused = focused;
     notifyListeners();
   }
 

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AnimatedPin extends StatefulWidget {
-  AnimatedPin({
-    Key? key,
-    this.child,
-  });
+  const AnimatedPin({Key? key, this.child}) : super(key: key);
 
   final Widget? child;
 
   @override
-  _AnimatedPinState createState() => _AnimatedPinState();
+  State<AnimatedPin> createState() => _AnimatedPinState();
 }
 
 class _AnimatedPinState extends State<AnimatedPin>
