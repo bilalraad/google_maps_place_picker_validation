@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_and_shape_pickers/google_maps_place_picker.dart';
 import 'package:google_maps_place_and_shape_pickers/providers/place_provider.dart';
 import 'package:google_maps_place_and_shape_pickers/src/components/animated_pin.dart';
-import 'package:google_maps_webservice/geocoding.dart';
+import 'package:google_maps_place_and_shape_pickers/utils/position_extension.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -45,7 +44,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
     this.usePlaceDetailSearch,
     this.selectInitialPosition,
     this.language,
-    this.pickArea,
+    this.circlePickArea,
     this.forceSearchOnZoomChanged,
     this.hidePlaceDetailsWhenDraggingPin,
     this.onCameraMoveStarted,
@@ -55,6 +54,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
     this.outsideOfPickAreaText,
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
+    this.circles = const {},
+    this.polygons = const {},
   }) : super(key: key);
 
   final LatLng initialTarget;
@@ -80,10 +81,13 @@ class GoogleMapPlacePicker extends StatelessWidget {
   final bool? selectInitialPosition;
 
   final String? language;
-  final CircleArea? pickArea;
+  final CircleArea? circlePickArea;
 
   final bool? forceSearchOnZoomChanged;
   final bool? hidePlaceDetailsWhenDraggingPin;
+
+  final Set<Circle> circles;
+  final Set<Polygon> polygons;
 
   /// GoogleMap pass-through events:
   final Function(PlaceProvider)? onCameraMoveStarted;
@@ -112,11 +116,11 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
     provider.placeSearchingState = SearchingState.Searching;
 
-    final GeocodingResponse response =
-        await provider.geocoding.searchByLocation(
+    final response = await provider.geocoding.searchByLocation(
       Location(
-          lat: provider.cameraPosition!.target.latitude,
-          lng: provider.cameraPosition!.target.longitude),
+        lat: provider.cameraPosition!.target.latitude,
+        lng: provider.cameraPosition!.target.longitude,
+      ),
       language: language,
     );
 
@@ -143,7 +147,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
           detailResponse.status == "REQUEST_DENIED") {
         if (kDebugMode) {
           print(
-              "Fetching details by placeId Error: ${detailResponse.errorMessage!}");
+            "Fetching details by placeId Error: ${detailResponse.errorMessage!}",
+          );
         }
         if (onSearchFailed != null) {
           onSearchFailed!(detailResponse.status);
@@ -193,9 +198,11 @@ class GoogleMapPlacePicker extends StatelessWidget {
             initialCameraPosition: initialCameraPosition,
             mapType: data,
             myLocationEnabled: true,
-            circles: pickArea != null && pickArea!.radius > 0
-                ? <Circle>{pickArea!}
-                : <Circle>{},
+            circles: <Circle>{
+              if (circlePickArea != null && circlePickArea!.radius > 0)
+                circlePickArea!,
+              ...circles
+            },
             onMapCreated: (GoogleMapController controller) {
               provider.mapController = controller;
               provider.setCameraPosition(null);
@@ -245,6 +252,16 @@ class GoogleMapPlacePicker extends StatelessWidget {
                 onCameraMoveStarted!(provider);
               }
 
+              if (provider.currentPosition != null && circlePickArea != null) {
+                if (circlePickArea!
+                    .checkIsValid(provider.currentPosition!.latLng)) {
+                  provider.mapController?.animateCamera(
+                    CameraUpdate.newLatLng(circlePickArea!.center),
+                  );
+                  return;
+                }
+              }
+
               provider.setPrevCameraPosition(provider.cameraPosition);
 
               // Cancel any other timer.
@@ -262,10 +279,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
             },
             onCameraMove: (CameraPosition position) {
               provider.setCameraPosition(position);
+
               if (onCameraMove != null) {
                 onCameraMove!(position);
               }
             },
+
             // gestureRecognizers make it possible to navigate the map when it's a
             // child in a scroll view e.g ListView, SingleChildScrollView...
             gestureRecognizers: {
@@ -276,18 +295,20 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _buildPin() {
-    return Center(
-      child: Selector<PlaceProvider, PinState>(
-        selector: (_, provider) => provider.pinState,
-        builder: (context, state, __) {
-          if (pinBuilder == null) {
-            return _defaultPinBuilder(context, state);
-          } else {
-            return Builder(
-                builder: (builderContext) =>
-                    pinBuilder!(builderContext, state));
-          }
-        },
+    return IgnorePointer(
+      child: Center(
+        child: Selector<PlaceProvider, PinState>(
+          selector: (_, provider) => provider.pinState,
+          builder: (context, state, __) {
+            if (pinBuilder == null) {
+              return _defaultPinBuilder(context, state);
+            } else {
+              return Builder(
+                builder: (builderContext) => pinBuilder!(builderContext, state),
+              );
+            }
+          },
+        ),
       ),
     );
   }
@@ -327,7 +348,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const <Widget>[
                 AnimatedPin(
-                    child: Icon(Icons.place, size: 36, color: Colors.red)),
+                  child: Icon(Icons.place, size: 36, color: Colors.red),
+                ),
                 SizedBox(height: 42),
               ],
             ),
@@ -464,16 +486,13 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
-    bool canBePicked = pickArea == null ||
-        pickArea!.radius <= 0 ||
-        Geolocator.distanceBetween(
-                pickArea!.center.latitude,
-                pickArea!.center.longitude,
-                result.geometry!.location.lat,
-                result.geometry!.location.lng) <=
-            pickArea!.radius;
+    final canBePicked = circlePickArea?.checkIsValid(result.latLng!) ?? true;
+    print(canBePicked);
+
     MaterialStateColor buttonColor = MaterialStateColor.resolveWith(
-        (states) => canBePicked ? Colors.lightGreen : Colors.red);
+      (states) => canBePicked ? Colors.lightGreen : Colors.red,
+    );
+
     return Container(
       margin: const EdgeInsets.all(10),
       child: Column(
@@ -491,17 +510,19 @@ class GoogleMapPlacePicker extends StatelessWidget {
                   child: ClipOval(
                     child: Material(
                       child: InkWell(
-                          overlayColor: buttonColor,
-                          onTap: () {
-                            if (canBePicked) {
-                              onPlacePicked!(result);
-                            }
-                          },
-                          child: Icon(
-                              canBePicked
-                                  ? Icons.check_sharp
-                                  : Icons.app_blocking_sharp,
-                              color: buttonColor)),
+                        overlayColor: buttonColor,
+                        onTap: () {
+                          if (canBePicked) {
+                            onPlacePicked!(result);
+                          }
+                        },
+                        child: Icon(
+                          canBePicked
+                              ? Icons.check_sharp
+                              : Icons.app_blocking_sharp,
+                          color: buttonColor,
+                        ),
+                      ),
                     ),
                   ),
                 )
@@ -512,31 +533,36 @@ class GoogleMapPlacePicker extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10.0),
                     child: Material(
                       child: InkWell(
-                          overlayColor: buttonColor,
-                          onTap: () {
-                            if (canBePicked) {
-                              onPlacePicked!(result);
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                  canBePicked
-                                      ? Icons.check_sharp
-                                      : Icons.app_blocking_sharp,
-                                  color: buttonColor),
-                              SizedBox.fromSize(size: const Size(10, 0)),
-                              Text(
-                                  canBePicked
-                                      ? selectText!
-                                      : outsideOfPickAreaText!,
-                                  style: TextStyle(color: buttonColor))
-                            ],
-                          )),
+                        overlayColor: buttonColor,
+                        onTap: () {
+                          if (canBePicked) {
+                            onPlacePicked!(result);
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              canBePicked
+                                  ? Icons.check_sharp
+                                  : Icons.app_blocking_sharp,
+                              color: buttonColor,
+                            ),
+                            SizedBox.fromSize(size: const Size(10, 0)),
+                            Text(
+                              canBePicked
+                                  ? selectText!
+                                  : outsideOfPickAreaText!,
+                              style: TextStyle(
+                                color: buttonColor,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                )
+                ),
         ],
       ),
     );

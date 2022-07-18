@@ -1,3 +1,4 @@
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
 
@@ -51,6 +52,12 @@ class PickResult {
   final num? utcOffset;
   final String? website;
   final List<Review>? reviews;
+
+  LatLng? get latLng {
+    return geometry?.location == null
+        ? null
+        : LatLng(geometry!.location.lat, geometry!.location.lng);
+  }
 
   factory PickResult.fromGeocodingResult(GeocodingResult result) {
     return PickResult(

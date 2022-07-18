@@ -490,7 +490,7 @@ class _PlacePickerState extends State<PlacePicker> {
       onMapCreated: widget.onMapCreated,
       selectInitialPosition: widget.selectInitialPosition,
       language: widget.autocompleteLanguage,
-      pickArea: widget.pickArea,
+      circlePickArea: widget.pickArea,
       forceSearchOnZoomChanged: widget.forceSearchOnZoomChanged,
       hidePlaceDetailsWhenDraggingPin: widget.hidePlaceDetailsWhenDraggingPin,
       selectText: widget.selectText,
