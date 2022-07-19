@@ -163,7 +163,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.3"
-  google_maps_place_and_shape_pickers:
+  google_maps_place_picker_validation:
     dependency: "direct main"
     description:
       path: ".."

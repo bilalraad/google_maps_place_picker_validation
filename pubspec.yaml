@@ -1,7 +1,7 @@
-name: google_maps_place_and_shape_pickers
+name: google_maps_place_picker_validation
 description: Place picker and Shape picker on Google Maps for Flutter
 version: 2.0.1
-homepage: https://github.com/masreplay/google_maps_place_and_shape_pickers
+homepage: https://github.com/masreplay/google_maps_place_picker_validation
 
 environment:
   sdk: ">=2.15.0 <3.0.0"

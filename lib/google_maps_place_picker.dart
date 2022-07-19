@@ -1,4 +1,4 @@
-library google_maps_place_and_shape_pickers;
+library google_maps_place_picker_validation;
 
 export 'src/models/pick_result.dart';
 export 'src/components/floating_card.dart';

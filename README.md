@@ -2,14 +2,13 @@
 <!-- TODO(masreplay): todo -->
 
 > This README is only slightly changed from its original repo which this repository was forked from. Due to little maintenance by the original author, I want to provide this fork that is not just more maintained, I also add more functionality to it and pick any significant changes and PRs on the original repository, as well.
-> 
+>
 > To install:  
-> 
+>
+> ```bash
+> flutter pub add google_maps_place_picker_validation
 > ```
-> flutter pub add google_maps_place_and_shape_pickers
-> ```
-> 
-> ~ _martin-braun_
+>
 
 ----------------------------------------------------
 
@@ -17,23 +16,17 @@ A Flutter plugin which provides 'Picking Place' using [Google Maps](https://deve
 
 The project relies on below packages.
 
-Map using Flutter's official [google_maps_flutter](https://pub.dev/packages/google_maps_flutter)   
-Fetching current location using Baseflow's [geolocator](https://pub.dev/packages/geolocator)   
-Place and Geocoding API using hadrienlejard's [google_maps_webservice](https://pub.dev/packages/google_maps_webservice)   
-Builder using kevmoo's [tuple](https://pub.dev/packages/tuple)   
+Map using Flutter's official [google_maps_flutter](https://pub.dev/packages/google_maps_flutter)
+Fetching current location using Baseflow's [geolocator](https://pub.dev/packages/geolocator)
+Place and Geocoding API using hadrienlejard's [google_maps_webservice](https://pub.dev/packages/google_maps_webservice)
+Builder using kevmoo's [tuple](https://pub.dev/packages/tuple)
 
 ## Preview
-![](preview.gif)
+
+![preview](preview.gif)
 
 > Note: This preview shows a new feature added by me: The ability to restrict the picked selection to the circle area. This can be disabled, obviously.
-> 
-> ~ _martin-braun_
-
-## Support
-If the package was useful or saved your time, please do not hesitate to buy <s>me</s> _the original author_ a cup of coffee! ;)  
-The more caffeine <s>I get</s> _he gets_, the more useful projects <s>I</s> _he_ can make in the future. 
-
-<a href="https://www.buymeacoffee.com/Oj17EcZ" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+>
 
 ## Getting Started
 
@@ -63,26 +56,28 @@ Specify your API key in the application manifest `android/app/src/main/AndroidMa
                android:value="YOUR ANDROID KEY HERE"/>
 ```
 
-> **NOTE:** As of version 3.0.0 the geolocator plugin switched to the AndroidX version of the Android Support Libraries. This means you need to make sure your Android project is also upgraded to support AndroidX. Detailed instructions can be found [here](https://flutter.dev/docs/development/packages-and-plugins/androidx-compatibility). 
+> **NOTE:** As of version 3.0.0 the geolocator plugin switched to the AndroidX version of the Android Support Libraries. This means you need to make sure your Android project is also upgraded to support AndroidX. Detailed instructions can be found [here](https://flutter.dev/docs/development/packages-and-plugins/androidx-compatibility).
 >
 >The TL;DR version is:
 >
 >1. Add the following to your "gradle.properties" file:
 >
->```
+>```xml
 >android.useAndroidX=true
 >android.enableJetifier=true
 >```
+>
 >2. Make sure you set the `compileSdkVersion` in your "android/app/build.gradle" file to 28:
 >
->```
+>```groovy
 >android {
 >  compileSdkVersion 28
 >
 >  ...
 >}
 >```
->3. Make sure you replace all the `android.` dependencies to their AndroidX counterparts (a full list can be found here: https://developer.android.com/jetpack/androidx/migrate).
+>
+>3. Make sure you replace all the `android.` dependencies to their AndroidX counterparts (a full list can be found here: <https://developer.android.com/jetpack/androidx/migrate>).
 
 ### iOS
 
@@ -123,7 +118,7 @@ import GoogleMaps
 }
 ```
 
-On iOS you'll need to add the following entries to your Info.plist file (located under ios/Runner) in order to access the device's location. 
+On iOS you'll need to add the following entries to your Info.plist file (located under ios/Runner) in order to access the device's location.
 
 Simply open your Info.plist file and add the following:
 
@@ -148,7 +143,7 @@ with the key `io.flutter.embedded_views_preview` and the value `YES`.
 
 If you want to run your app on the Simulator, please make sure to set a location on the Simulator's menu:
 
-<img src="simulator_location.png" />
+()[simulator_location.png]
 
 ## Usage
 
@@ -160,7 +155,7 @@ Alternatively, you can build your own way with 'selectedPlaceWidgetBuilder' and 
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:google_maps_place_and_shape_pickers/google_maps_place_picker.dart';
+import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:io' show Platform;
 
@@ -184,7 +179,8 @@ Navigator.push(
     );
 ```
 
-#### PickResult 
+#### PickResult
+
 Parameter | Type | Description
 --------- | ---- | -----------
 placeId | String | A textual identifier that uniquely identifies a place. To retrieve information about the place, pass this identifier in the placeId field of a Places API request. See [PlaceId](https://developers.google.com/places/web-service/place-id) for more information.
@@ -194,7 +190,9 @@ types | List\<String\> | Contains an array of feature types describing the given
 addressComponents | List\<AddressComponent\> | An array containing the separate components applicable to this address.
   
 ** Below results will be fetched only when using auto-complete search or usePlaceDetailSearch is set to true when searching by dragging the map.
+
 #### PickResult (Optional)
+
 Parameter | Type | Description
 --------- | ---- | -----------
 adrAddress | String | A representation of the place's address in the [adr microformat](https://microformats.org/wiki/adr)
@@ -209,7 +207,7 @@ internationalPhoneNumber | String | The place's phone number in international fo
 priceLevel | PriceLevel | The price level of the place, on a scale of 0 to 4. The exact amount indicated by a specific value will vary from region to region.
 rating | num | The place's rating, from 1.0 to 5.0, based on aggregated user reviews.
 scope | String |
-url | String | The URL of the official Google page for this place. 
+url | String | The URL of the official Google page for this place.
 vicinity | String | Lists a simplified address for the place, including the street name, street number, and locality, but not the province/state, postal code, or country
 utcOffset | num | The number of minutes this place’s current timezone is offset from UTC
 website | String | The authoritative website for this place
@@ -218,11 +216,12 @@ reviews | List\<Review\> | JSON array of up to five reviews
 [More info](https://developers.google.com/places/web-service/details) about results at Google document.
 
 #### PlacePicker
+
 Parameter | Type | Description
 --------- | ---- | -----------
 apiKey | String | (Required) Your google map API Key
 onPlacePicked | Callback(PickResult) | Invoked when user picks the place and selects to use it. **This will not be called if you manually build 'selectedPlaceWidgetBuilder' as you will override default 'Select here' button.**
-initialPosition | LatLng | (Required) Initial center position of google map when it is created. If useCurrentLocation is set to true, it will try to get device's current location first using GeoLocator. 
+initialPosition | LatLng | (Required) Initial center position of google map when it is created. If useCurrentLocation is set to true, it will try to get device's current location first using GeoLocator.
 useCurrentLocation | bool | Whether to use device's current location for initial center position. This will be used instead of initial position when it is set to true AND user ALLOW to collect their location. If DENIED, initialPosition will be used.
 desiredLocationAccuracy | [LocationAccuracy](https://pub.dev/packages/geolocator) | Accuracy of fetching current location. Defaults to 'high'.
 hintText | String | Hint text of search bar
@@ -246,7 +245,7 @@ pinBuilder | WidgetBuilder | Specified on below section
 introPanelWidgetBuilder | WidgetBuilder | Specified on below section
 autocompleteOffset | num | The position, in the input term, of the last character that the service uses to match predictions
 autocompleteRadius | num | The distance (in meters) within which to return place results
-autocompleteLanguage | String | The [language code](https://developers.google.com/maps/faq#languagesupport), indicating in which language the results should be returned, if possible. 
+autocompleteLanguage | String | The [language code](https://developers.google.com/maps/faq#languagesupport), indicating in which language the results should be returned, if possible.
 autocompleteComponents | List\<Components\> | A grouping of places to which you would like to restrict your results. Currently, you can use components to filter by up to 5 countries.
 autocompleteTypes | List\<String\> | The types of place results to return. See [Place Types](https://developers.google.com/places/web-service/autocomplete#place_types).
 strictbounds | bool | Returns only those places that are strictly within the region defined by location and radius.
@@ -257,7 +256,7 @@ resizeToAvoidBottomInset | bool | Refer to Scaffold's resizeToAvoidBottomInset p
 initialSearchString | String | Sets initial search string for auto complete search
 searchForInitialValue | bool | Wether to automatically search for initial value on start
 forceAndroidLocationManager | bool | On Android devices you can set this to true to force the geolocator plugin to use the 'LocationManager' to determine the position instead of the 'FusedLocationProviderClient'. On iOS this is ignored.
-myLocationButtonCooldown | int | Cooldown time in seconds for the 'myLocationButton'. Defaults to 10 seconds. 
+myLocationButtonCooldown | int | Cooldown time in seconds for the 'myLocationButton'. Defaults to 10 seconds.
 forceSearchOnZoomChanged | bool | Wether to allow place search even when the zoom has changed. Defaults to false.
 automaticallyImplyAppBarLeading | bool | By default, there is a back button on the top. Setting false will remove the back button.
 autocompleteOnTrailingWhitespace | bool | Whether to allow autocomplete to run even on whitespace at the end of the search. Defaults to false. Issue ref #54.
@@ -271,8 +270,7 @@ onCameraIdle\* | Function(PlaceProvider)? | Called when camera movement has ende
 onMapTypeChanged\* | Callback(MapType) | Invoked when user changes map type.
 
 > \* MB edition exclusive, as of now
-> 
-> ~ _martin-braun_
+>
 
 [More info](https://developers.google.com/places/web-service/autocomplete) about autocomplete search at Google document.
 
@@ -307,6 +305,7 @@ PlacePicker(apiKey: APIKeys.apiKey,
           ),
 ...
 ```
+
 Parameters | Type | Description
 ---------- | ---- | -----------
 context | BuildContext | Flutter's build context value
@@ -315,7 +314,8 @@ state | SearchingState | State of searching action. (Idle, Searching)
 isSearchBarFocused | bool | Whether the search bar is currently focused so the keyboard is shown
 
 ### Customizing Pin
-By default, Pin icon is provided with very simple picking animation when moving around.   
+
+By default, Pin icon is provided with very simple picking animation when moving around.
 However, you can also create your own pin widget using 'pinBuilder'
 
 ```dart
@@ -339,7 +339,8 @@ context | BuildContext | Flutter's build context value
 state | PinState | State of pin. (Preparing; When map loading, Idle, Dragging)
 
 ### Add customized introduction modal
-By default the map will show up, immediately. You might want to show a nice customized overlay modal with instructions, especially, when the map is turned on after first start of your app. In that case this custom widget builder makes sense, because you will obtain the most freedom in terms of branding to avoid people thinking they opened Google Maps. 
+
+By default the map will show up, immediately. You might want to show a nice customized overlay modal with instructions, especially, when the map is turned on after first start of your app. In that case this custom widget builder makes sense, because you will obtain the most freedom in terms of branding to avoid people thinking they opened Google Maps.
 
 ```dart
 PlacePicker(apiKey: APIKeys.apiKey,
@@ -416,6 +417,7 @@ context | BuildContext | Flutter's build context value
 close | Function | Function to be called to close the modal, thus removing the widget and its overlay from the tree.
 
 ### Changing Colours of default FloatingCard
+
 While you can build your own prediction tile, you still can change the style of default tile using themeData as below:
 
 ```dart
@@ -432,12 +434,12 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
 );
 ```
 
-![](screenshot2.png)
+![screenshot2](screenshot2.png)
 
 ## Feature Requests and Issues
+
 > Please file feature requests at the [original issue tracker][tracker] and bugs at the [MB edition issue tracker][tracker_fork]. I fetch any significant feature requests from the original repository, but bugs could be specific to this MB edition, so I want to take care by myself on them.
-> 
-> ~ _martin-braun_ 
+>  
 
 [tracker]: https://github.com/fysoul17/google_maps_place_picker/issues
-[tracker_fork]: https://github.com/martin-braun/google_maps_place_and_shape_pickers/issues
+[tracker_fork]: https://github.com/martin-braun/google_maps_place_picker_validation/issues

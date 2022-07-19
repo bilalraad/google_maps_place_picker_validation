@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_and_shape_pickers/google_maps_place_picker.dart';
+import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 
 // Your api key storage.
 import 'keys.dart';
@@ -131,7 +131,8 @@ class _HomePageState extends State<HomePage> {
             pickArea: CircleArea(
               center: HomePage.kInitialPosition,
               radius: 500,
-              fillColor: Colors.red,
+              strokeWidth: 2,
+              // fillColor: Colors.red,
               strokeColor: Colors.red,
               validation: true,
             ),

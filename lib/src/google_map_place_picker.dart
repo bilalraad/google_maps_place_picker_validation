@@ -4,10 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_place_and_shape_pickers/google_maps_place_picker.dart';
-import 'package:google_maps_place_and_shape_pickers/providers/place_provider.dart';
-import 'package:google_maps_place_and_shape_pickers/src/components/animated_pin.dart';
-import 'package:google_maps_place_and_shape_pickers/utils/position_extension.dart';
+import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
+import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
+import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -219,6 +218,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
               }
             },
             onCameraIdle: () {
+              if (!circlePickArea!
+                  .checkIsValid(provider.prevCameraPosition!.target)) {
+                provider.mapController?.animateCamera(
+                  CameraUpdate.newLatLng(circlePickArea!.center),
+                );
+              }
               if (provider.isAutoCompleteSearching) {
                 provider.isAutoCompleteSearching = false;
                 provider.pinState = PinState.Idle;
@@ -234,6 +239,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
                   if (provider.debounceTimer?.isActive ?? false) {
                     provider.debounceTimer!.cancel();
                   }
+
                   provider.debounceTimer =
                       Timer(Duration(milliseconds: debounceMilliseconds!), () {
                     _searchByCameraLocation(provider);
@@ -250,16 +256,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
             onCameraMoveStarted: () {
               if (onCameraMoveStarted != null) {
                 onCameraMoveStarted!(provider);
-              }
-
-              if (provider.currentPosition != null && circlePickArea != null) {
-                if (circlePickArea!
-                    .checkIsValid(provider.currentPosition!.latLng)) {
-                  provider.mapController?.animateCamera(
-                    CameraUpdate.newLatLng(circlePickArea!.center),
-                  );
-                  return;
-                }
               }
 
               provider.setPrevCameraPosition(provider.cameraPosition);
@@ -487,7 +483,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
     final canBePicked = circlePickArea?.checkIsValid(result.latLng!) ?? true;
-    print(canBePicked);
 
     MaterialStateColor buttonColor = MaterialStateColor.resolveWith(
       (states) => canBePicked ? Colors.lightGreen : Colors.red,
