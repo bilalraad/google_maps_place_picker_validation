@@ -132,7 +132,6 @@ class _HomePageState extends State<HomePage> {
               center: HomePage.kInitialPosition,
               radius: 500,
               strokeWidth: 2,
-              // fillColor: Colors.red,
               strokeColor: Colors.red,
               validation: true,
             ),

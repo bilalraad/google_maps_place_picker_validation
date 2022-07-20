@@ -1,3 +1,6 @@
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+// ignore: library_prefixes
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -9,8 +12,7 @@ import 'package:google_maps_place_picker_validation/src/place_picker.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
-// ignore: library_prefixes
-import 'package:location/location.dart' as LocationPlatformInterface;
+import 'package:location/location.dart' as _location;
 import 'package:provider/provider.dart';
 
 class PlaceProvider extends ChangeNotifier {
@@ -45,10 +47,9 @@ class PlaceProvider extends ChangeNotifier {
   LocationAccuracy? desiredAccuracy;
   bool isAutoCompleteSearching = false;
 
-  LocationPlatformInterface.Location location =
-      LocationPlatformInterface.Location();
-  LocationPlatformInterface.PermissionStatus permissionGranted =
-      LocationPlatformInterface.PermissionStatus.denied;
+  _location.Location location = _location.Location();
+  _location.PermissionStatus permissionGranted =
+      _location.PermissionStatus.denied;
   bool isLocationServiceEnabled = false;
 
   Future<void> updateCurrentLocation(bool forceAndroidLocationManager) async {
@@ -63,8 +64,7 @@ class PlaceProvider extends ChangeNotifier {
     permissionGranted = await location.hasPermission();
     try {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted ==
-          LocationPlatformInterface.PermissionStatus.granted) {
+      if (permissionGranted == _location.PermissionStatus.granted) {
         currentPosition = await Geolocator.getCurrentPosition(
             desiredAccuracy: desiredAccuracy ?? LocationAccuracy.best);
       } else {

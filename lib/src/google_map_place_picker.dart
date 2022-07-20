@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,6 +8,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
+import 'package:google_maps_place_picker_validation/src/models/polygon_area.dart';
+import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -44,6 +47,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
     this.selectInitialPosition,
     this.language,
     this.circlePickArea,
+    this.polygonPickArea,
     this.forceSearchOnZoomChanged,
     this.hidePlaceDetailsWhenDraggingPin,
     this.onCameraMoveStarted,
@@ -81,6 +85,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   final String? language;
   final CircleArea? circlePickArea;
+  final PolygonArea? polygonPickArea;
 
   final bool? forceSearchOnZoomChanged;
   final bool? hidePlaceDetailsWhenDraggingPin;
@@ -181,113 +186,122 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   Widget _buildGoogleMap(BuildContext context) {
     return Selector<PlaceProvider, MapType>(
-        selector: (_, provider) => provider.mapType,
-        builder: (_, data, __) {
-          PlaceProvider provider = PlaceProvider.of(context, listen: false);
-          CameraPosition initialCameraPosition =
-              CameraPosition(target: initialTarget, zoom: 15);
+      selector: (_, provider) => provider.mapType,
+      builder: (_, data, __) {
+        PlaceProvider provider = PlaceProvider.of(context, listen: false);
+        CameraPosition initialCameraPosition =
+            CameraPosition(target: initialTarget, zoom: 15);
 
-          return GoogleMap(
-            zoomGesturesEnabled: zoomGesturesEnabled,
-            zoomControlsEnabled:
-                false, // we use our own implementation that supports iOS as well, see _buildZoomButtons()
-            myLocationButtonEnabled: false,
-            compassEnabled: false,
-            mapToolbarEnabled: false,
-            initialCameraPosition: initialCameraPosition,
-            mapType: data,
-            myLocationEnabled: true,
-            circles: <Circle>{
-              if (circlePickArea != null && circlePickArea!.radius > 0)
-                circlePickArea!,
-              ...circles
-            },
-            onMapCreated: (GoogleMapController controller) {
-              provider.mapController = controller;
-              provider.setCameraPosition(null);
+        return GoogleMap(
+          zoomGesturesEnabled: zoomGesturesEnabled,
+          zoomControlsEnabled:
+              false, // we use our own implementation that supports iOS as well, see _buildZoomButtons()
+          myLocationButtonEnabled: false,
+          compassEnabled: false,
+          mapToolbarEnabled: false,
+          initialCameraPosition: initialCameraPosition,
+          mapType: data,
+          myLocationEnabled: true,
+          circles: <Circle>{
+            if (circlePickArea != null && circlePickArea!.radius > 0)
+              circlePickArea!,
+            ...circles
+          },
+          onMapCreated: (GoogleMapController controller) {
+            provider.mapController = controller;
+            provider.setCameraPosition(null);
+            provider.pinState = PinState.Idle;
+
+            // When select initialPosition set to true.
+            if (selectInitialPosition!) {
+              provider.setCameraPosition(initialCameraPosition);
+              _searchByCameraLocation(provider);
+            }
+
+            if (onMapCreated != null) {
+              onMapCreated!(controller);
+            }
+          },
+          onCameraIdle: () {
+            if (provider.isAutoCompleteSearching) {
+              provider.isAutoCompleteSearching = false;
               provider.pinState = PinState.Idle;
+              provider.placeSearchingState = SearchingState.Idle;
+              return;
+            }
 
-              // When select initialPosition set to true.
-              if (selectInitialPosition!) {
-                provider.setCameraPosition(initialCameraPosition);
-                _searchByCameraLocation(provider);
-              }
+            log("distance ${provider.selectedPlace?.latLng} ${provider.currentPosition?.latLng} ${circlePickArea?.center}");
 
-              if (onMapCreated != null) {
-                onMapCreated!(controller);
-              }
-            },
-            onCameraIdle: () {
-              if (!circlePickArea!
-                  .checkIsValid(provider.prevCameraPosition!.target)) {
-                provider.mapController?.animateCamera(
-                  CameraUpdate.newLatLng(circlePickArea!.center),
-                );
-              }
-              if (provider.isAutoCompleteSearching) {
-                provider.isAutoCompleteSearching = false;
-                provider.pinState = PinState.Idle;
-                provider.placeSearchingState = SearchingState.Idle;
-                return;
-              }
-
-              // Perform search only if the setting is to true.
-              if (usePinPointingSearch!) {
-                // Search current camera location only if camera has moved (dragged) before.
-                if (provider.pinState == PinState.Dragging) {
-                  // Cancel previous timer.
-                  if (provider.debounceTimer?.isActive ?? false) {
-                    provider.debounceTimer!.cancel();
-                  }
-
-                  provider.debounceTimer =
-                      Timer(Duration(milliseconds: debounceMilliseconds!), () {
-                    _searchByCameraLocation(provider);
-                  });
+            // Perform search only if the setting is to true.
+            if (usePinPointingSearch!) {
+              // Search current camera location only if camera has moved (dragged) before.
+              if (provider.pinState == PinState.Dragging) {
+                // Cancel previous timer.
+                if (provider.debounceTimer?.isActive ?? false) {
+                  provider.debounceTimer!.cancel();
                 }
+
+                provider.debounceTimer =
+                    Timer(Duration(milliseconds: debounceMilliseconds!), () {
+                  _searchByCameraLocation(provider);
+                });
               }
+            }
 
-              provider.pinState = PinState.Idle;
+            provider.pinState = PinState.Idle;
 
-              if (onCameraIdle != null) {
-                onCameraIdle!(provider);
-              }
-            },
-            onCameraMoveStarted: () {
-              if (onCameraMoveStarted != null) {
-                onCameraMoveStarted!(provider);
-              }
+            validate(provider);
+            if (onCameraIdle != null) {
+              onCameraIdle!(provider);
+            }
+          },
+          onCameraMoveStarted: () {
+            if (onCameraMoveStarted != null) {
+              onCameraMoveStarted!(provider);
+            }
 
-              provider.setPrevCameraPosition(provider.cameraPosition);
+            provider.setPrevCameraPosition(provider.cameraPosition);
 
-              // Cancel any other timer.
-              provider.debounceTimer?.cancel();
+            // Cancel any other timer.
+            provider.debounceTimer?.cancel();
 
-              // Update state, dismiss keyboard and clear text.
-              provider.pinState = PinState.Dragging;
+            // Update state, dismiss keyboard and clear text.
+            provider.pinState = PinState.Dragging;
 
-              // Begins the search state if the hide details is enabled
-              if (hidePlaceDetailsWhenDraggingPin!) {
-                provider.placeSearchingState = SearchingState.Searching;
-              }
+            // Begins the search state if the hide details is enabled
+            if (hidePlaceDetailsWhenDraggingPin!) {
+              provider.placeSearchingState = SearchingState.Searching;
+            }
 
-              onMoveStart!();
-            },
-            onCameraMove: (CameraPosition position) {
-              provider.setCameraPosition(position);
+            onMoveStart!();
+          },
+          onCameraMove: (CameraPosition position) {
+            provider.setCameraPosition(position);
 
-              if (onCameraMove != null) {
-                onCameraMove!(position);
-              }
-            },
+            if (onCameraMove != null) {
+              onCameraMove!(position);
+            }
+          },
 
-            // gestureRecognizers make it possible to navigate the map when it's a
-            // child in a scroll view e.g ListView, SingleChildScrollView...
-            gestureRecognizers: {
-              Factory<EagerGestureRecognizer>(() => EagerGestureRecognizer())
-            },
-          );
-        });
+          // gestureRecognizers make it possible to navigate the map when it's a
+          // child in a scroll view e.g ListView, SingleChildScrollView...
+          gestureRecognizers: {
+            Factory<EagerGestureRecognizer>(() => EagerGestureRecognizer())
+          },
+        );
+      },
+    );
+  }
+
+  void validate(PlaceProvider provider) {
+    provider.setPrevCameraPosition(provider.cameraPosition);
+    if (circlePickArea?.checkIsNotValid(provider.prevCameraPosition!.target) ??
+        false) {
+      provider.setPrevCameraPosition(provider.cameraPosition);
+      provider.mapController?.animateCamera(
+        CameraUpdate.newLatLng(circlePickArea!.center),
+      );
+    }
   }
 
   Widget _buildPin() {

@@ -19,4 +19,9 @@ class PolygonArea extends Polygon {
           points: points,
           strokeWidth: strokeWidth,
         );
+
+  bool checkIsValid(LatLng latLng) {
+    // TODO(masreplay): raycasting
+    return false;
+  }
 }

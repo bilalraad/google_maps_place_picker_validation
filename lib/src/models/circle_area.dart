@@ -32,11 +32,15 @@ class CircleArea extends Circle {
       latLng.latitude,
       latLng.longitude,
     );
-    bool _valid = distance <= radius;
+    bool valid = distance <= radius;
 
     if (kDebugMode) {
-      log("distance $_valid $distance: $center, $radius: $latLng");
+      // log("distance $valid $distance: $center, $radius: $latLng");
     }
-    return _valid;
+    return valid;
+  }
+
+  bool checkIsNotValid(LatLng latLng) {
+    return !checkIsValid(latLng);
   }
 }
