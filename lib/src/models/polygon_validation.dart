@@ -20,7 +20,7 @@ class PolygonValidation extends Polygon {
         );
 
   bool checkIsValid(LatLng point) {
-    return checkIfValidMarker(point);
+    return !checkIfValidMarker(point);
   }
 
   bool checkIsNotValid(LatLng point) {

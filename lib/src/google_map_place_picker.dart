@@ -301,21 +301,23 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   void validate(PlaceProvider provider) {
     provider.setPrevCameraPosition(provider.cameraPosition);
-    if (circleValidation != null) {
-      if (circleValidation!
-          .checkIsNotValid(provider.prevCameraPosition!.target)) {
-        provider.setPrevCameraPosition(provider.cameraPosition);
-        provider.mapController?.animateCamera(
-          CameraUpdate.newLatLng(circleValidation!.center),
-        );
-      }
-    } else if (polygonValidation != null) {
-      if (polygonValidation!
-          .checkIsNotValid(provider.prevCameraPosition!.target)) {
-        provider.setPrevCameraPosition(provider.cameraPosition);
-        provider.mapController?.animateCamera(
-          CameraUpdate.newLatLng(polygonValidation!.center),
-        );
+    if (provider.prevCameraPosition != null) {
+      if (circleValidation != null) {
+        if (circleValidation!
+            .checkIsNotValid(provider.prevCameraPosition!.target)) {
+          provider.setPrevCameraPosition(provider.cameraPosition);
+          provider.mapController?.animateCamera(
+            CameraUpdate.newLatLng(circleValidation!.center),
+          );
+        }
+      } else if (polygonValidation != null) {
+        if (polygonValidation!
+            .checkIsNotValid(provider.prevCameraPosition!.target)) {
+          provider.setPrevCameraPosition(provider.cameraPosition);
+          provider.mapController?.animateCamera(
+            CameraUpdate.newLatLng(polygonValidation!.center),
+          );
+        }
       }
     }
   }
@@ -512,7 +514,9 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
-    final canBePicked = circleValidation?.checkIsValid(result.latLng!) ?? true;
+    final canBePicked = circleValidation?.checkIsValid(result.latLng!) ??
+        polygonValidation?.checkIsValid(result.latLng!) ??
+        true;
 
     MaterialStateColor buttonColor = MaterialStateColor.resolveWith(
       (states) => canBePicked ? Colors.lightGreen : Colors.red,
