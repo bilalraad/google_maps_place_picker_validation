@@ -8,7 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
-import 'package:google_maps_place_picker_validation/src/models/polygon_area.dart';
+import 'package:google_maps_place_picker_validation/src/models/polygon_validation.dart';
 import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
@@ -27,40 +27,6 @@ typedef PinBuilder = Widget Function(
 );
 
 class GoogleMapPlacePicker extends StatelessWidget {
-  const GoogleMapPlacePicker({
-    Key? key,
-    required this.initialTarget,
-    required this.appBarKey,
-    this.selectedPlaceWidgetBuilder,
-    this.pinBuilder,
-    this.onSearchFailed,
-    this.onMoveStart,
-    this.onMapCreated,
-    this.debounceMilliseconds,
-    this.enableMapTypeButton,
-    this.enableMyLocationButton,
-    this.onToggleMapType,
-    this.onMyLocation,
-    this.onPlacePicked,
-    this.usePinPointingSearch,
-    this.usePlaceDetailSearch,
-    this.selectInitialPosition,
-    this.language,
-    this.circlePickArea,
-    this.polygonPickArea,
-    this.forceSearchOnZoomChanged,
-    this.hidePlaceDetailsWhenDraggingPin,
-    this.onCameraMoveStarted,
-    this.onCameraMove,
-    this.onCameraIdle,
-    this.selectText,
-    this.outsideOfPickAreaText,
-    this.zoomGesturesEnabled = true,
-    this.zoomControlsEnabled = false,
-    this.circles = const {},
-    this.polygons = const {},
-  }) : super(key: key);
-
   final LatLng initialTarget;
   final GlobalKey appBarKey;
 
@@ -84,14 +50,16 @@ class GoogleMapPlacePicker extends StatelessWidget {
   final bool? selectInitialPosition;
 
   final String? language;
-  final CircleArea? circlePickArea;
-  final PolygonArea? polygonPickArea;
+
+  final CircleValidation? circleValidation;
+  final PolygonValidation? polygonValidation;
 
   final bool? forceSearchOnZoomChanged;
   final bool? hidePlaceDetailsWhenDraggingPin;
 
   final Set<Circle> circles;
   final Set<Polygon> polygons;
+  final Set<Polyline> polylines;
 
   /// GoogleMap pass-through events:
   final Function(PlaceProvider)? onCameraMoveStarted;
@@ -105,6 +73,42 @@ class GoogleMapPlacePicker extends StatelessWidget {
   /// Zoom feature toggle
   final bool zoomGesturesEnabled;
   final bool zoomControlsEnabled;
+
+  const GoogleMapPlacePicker({
+    Key? key,
+    required this.initialTarget,
+    required this.appBarKey,
+    this.selectedPlaceWidgetBuilder,
+    this.pinBuilder,
+    this.onSearchFailed,
+    this.onMoveStart,
+    this.onMapCreated,
+    this.debounceMilliseconds,
+    this.enableMapTypeButton,
+    this.enableMyLocationButton,
+    this.onToggleMapType,
+    this.onMyLocation,
+    this.onPlacePicked,
+    this.usePinPointingSearch,
+    this.usePlaceDetailSearch,
+    this.selectInitialPosition,
+    this.language,
+    this.circleValidation,
+    this.polygonValidation,
+    this.forceSearchOnZoomChanged,
+    this.hidePlaceDetailsWhenDraggingPin,
+    this.onCameraMoveStarted,
+    this.onCameraMove,
+    this.onCameraIdle,
+    this.selectText,
+    this.outsideOfPickAreaText,
+    this.zoomGesturesEnabled = true,
+    this.zoomControlsEnabled = false,
+    this.circles = const {},
+    this.polygons = const {},
+    this.polylines = const {},
+  })  : assert(polygonValidation == null || circleValidation == null),
+        super(key: key);
 
   _searchByCameraLocation(PlaceProvider provider) async {
     // We don't want to search location again if camera location is changed by zooming in/out.
@@ -203,10 +207,14 @@ class GoogleMapPlacePicker extends StatelessWidget {
           mapType: data,
           myLocationEnabled: true,
           circles: <Circle>{
-            if (circlePickArea != null && circlePickArea!.radius > 0)
-              circlePickArea!,
+            if (circleValidation != null) circleValidation!,
             ...circles
           },
+          polygons: <Polygon>{
+            if (polygonValidation != null) polygonValidation!,
+            ...polygons
+          },
+          polylines: polylines,
           onMapCreated: (GoogleMapController controller) {
             provider.mapController = controller;
             provider.setCameraPosition(null);
@@ -229,8 +237,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
               provider.placeSearchingState = SearchingState.Idle;
               return;
             }
-
-            log("distance ${provider.selectedPlace?.latLng} ${provider.currentPosition?.latLng} ${circlePickArea?.center}");
 
             // Perform search only if the setting is to true.
             if (usePinPointingSearch!) {
@@ -295,12 +301,22 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   void validate(PlaceProvider provider) {
     provider.setPrevCameraPosition(provider.cameraPosition);
-    if (circlePickArea?.checkIsNotValid(provider.prevCameraPosition!.target) ??
-        false) {
-      provider.setPrevCameraPosition(provider.cameraPosition);
-      provider.mapController?.animateCamera(
-        CameraUpdate.newLatLng(circlePickArea!.center),
-      );
+    if (circleValidation != null) {
+      if (circleValidation!
+          .checkIsNotValid(provider.prevCameraPosition!.target)) {
+        provider.setPrevCameraPosition(provider.cameraPosition);
+        provider.mapController?.animateCamera(
+          CameraUpdate.newLatLng(circleValidation!.center),
+        );
+      }
+    } else if (polygonValidation != null) {
+      if (polygonValidation!
+          .checkIsNotValid(provider.prevCameraPosition!.target)) {
+        provider.setPrevCameraPosition(provider.cameraPosition);
+        provider.mapController?.animateCamera(
+          CameraUpdate.newLatLng(polygonValidation!.center),
+        );
+      }
     }
   }
 
@@ -496,7 +512,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _buildSelectionDetails(BuildContext context, PickResult result) {
-    final canBePicked = circlePickArea?.checkIsValid(result.latLng!) ?? true;
+    final canBePicked = circleValidation?.checkIsValid(result.latLng!) ?? true;
 
     MaterialStateColor buttonColor = MaterialStateColor.resolveWith(
       (states) => canBePicked ? Colors.lightGreen : Colors.red,

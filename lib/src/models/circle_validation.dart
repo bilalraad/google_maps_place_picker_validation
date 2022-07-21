@@ -1,21 +1,18 @@
-import 'dart:developer';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class CircleArea extends Circle {
+class CircleValidation extends Circle {
   final bool validation;
-  CircleArea({
-    required this.validation,
+  CircleValidation({
     required LatLng center,
     required double radius,
     Color? fillColor,
     Color? strokeColor,
     int strokeWidth = 2,
-  })  : assert(radius >= 0, "radius must be greater than zero"),
+    this.validation = true,
+  })  : assert(radius > 0, "radius must be greater than zero"),
         super(
           circleId: CircleId(const Uuid().v4()),
           center: center,
@@ -25,22 +22,19 @@ class CircleArea extends Circle {
           strokeWidth: strokeWidth,
         );
 
-  bool checkIsValid(LatLng latLng) {
+  bool checkIsValid(LatLng point) {
     final distance = Geolocator.distanceBetween(
       center.latitude,
       center.longitude,
-      latLng.latitude,
-      latLng.longitude,
+      point.latitude,
+      point.longitude,
     );
     bool valid = distance <= radius;
 
-    if (kDebugMode) {
-      // log("distance $valid $distance: $center, $radius: $latLng");
-    }
     return valid;
   }
 
-  bool checkIsNotValid(LatLng latLng) {
-    return !checkIsValid(latLng);
+  bool checkIsNotValid(LatLng point) {
+    return !checkIsValid(point);
   }
 }

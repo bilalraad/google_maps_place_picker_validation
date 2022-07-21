@@ -12,6 +12,7 @@ import 'package:google_maps_place_picker_validation/providers/place_provider.dar
 import 'package:google_maps_place_picker_validation/src/autocomplete_search.dart';
 import 'package:google_maps_place_picker_validation/src/controllers/autocomplete_search_controller.dart';
 import 'package:google_maps_place_picker_validation/src/google_map_place_picker.dart';
+import 'package:google_maps_place_picker_validation/src/models/polygon_validation.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class PlacePicker extends StatefulWidget {
     this.autocompleteTypes,
     this.strictbounds,
     this.region,
-    this.pickArea,
+    this.circleValidation,
     this.selectInitialPosition = false,
     this.resizeToAvoidBottomInset = true,
     this.initialSearchString,
@@ -78,6 +79,7 @@ class PlacePicker extends StatefulWidget {
     this.onMapTypeChanged,
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
+    this.polygonValidation,
   }) : super(key: key);
 
   final String apiKey;
@@ -114,7 +116,11 @@ class PlacePicker extends StatefulWidget {
 
   /// If set the picker can only pick addresses in the given circle area.
   /// The section will be highlighted.
-  final CircleArea? pickArea;
+  final CircleValidation? circleValidation;
+
+  /// If set the picker can only pick addresses in the given polygon area.
+  /// The section will be highlighted.
+  final PolygonValidation? polygonValidation;
 
   /// If true the [body] and the scaffold's floating widgets should size
   /// themselves to avoid the onscreen keyboard whose height is defined by the
@@ -490,7 +496,8 @@ class _PlacePickerState extends State<PlacePicker> {
       onMapCreated: widget.onMapCreated,
       selectInitialPosition: widget.selectInitialPosition,
       language: widget.autocompleteLanguage,
-      circlePickArea: widget.pickArea,
+      circleValidation: widget.circleValidation,
+      polygonValidation: widget.polygonValidation,
       forceSearchOnZoomChanged: widget.forceSearchOnZoomChanged,
       hidePlaceDetailsWhenDraggingPin: widget.hidePlaceDetailsWhenDraggingPin,
       selectText: widget.selectText,
