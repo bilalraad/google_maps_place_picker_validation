@@ -116,6 +116,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onLoadGoogleMapPressed() {
+    final polygonValidation = PolygonValidation(points: polygon);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -127,14 +128,14 @@ class _HomePageState extends State<HomePage> {
             searchingText: "Please wait ...",
             selectText: "Select place",
             outsideOfPickAreaText: "Place not in area",
-            initialPosition: HomePage.kInitialPosition,
+            initialPosition: polygonValidation.center,
             // circleValidation: CircleValidation(
             //   center: HomePage.kInitialPosition,
             //   radius: 500,
             //   strokeWidth: 2,
             //   strokeColor: Colors.red,
             // ),
-            polygonValidation: PolygonValidation(points: polygon),
+            polygonValidation: polygonValidation,
             selectInitialPosition: true,
             usePinPointingSearch: true,
             usePlaceDetailSearch: true,
