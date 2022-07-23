@@ -32,7 +32,7 @@ class PlacePicker extends StatefulWidget {
     Key? key,
     required this.apiKey,
     this.onPlacePicked,
-    required this.initialPosition,
+    required this.initialCameraPosition,
     this.useCurrentLocation,
     this.desiredLocationAccuracy = LocationAccuracy.high,
     this.onMapCreated,
@@ -80,11 +80,14 @@ class PlacePicker extends StatefulWidget {
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
     this.polygonValidation,
+    this.circles = const {},
+    this.polygons = const {},
+    this.polylines = const {},
   }) : super(key: key);
 
   final String apiKey;
 
-  final LatLng initialPosition;
+  final CameraPosition initialCameraPosition;
   final bool? useCurrentLocation;
   final LocationAccuracy desiredLocationAccuracy;
 
@@ -237,6 +240,9 @@ class PlacePicker extends StatefulWidget {
   final bool zoomGesturesEnabled;
   final bool zoomControlsEnabled;
 
+  final Set<Circle> circles;
+  final Set<Polygon> polygons;
+  final Set<Polyline> polylines;
   @override
   State<PlacePicker> createState() => _PlacePickerState();
 }
@@ -460,10 +466,16 @@ class _PlacePickerState extends State<PlacePicker> {
               return const Center(child: CircularProgressIndicator());
             } else {
               if (_provider!.currentPosition == null) {
-                return _buildMap(widget.initialPosition);
+                return _buildMap(widget.initialCameraPosition);
               } else {
-                return _buildMap(LatLng(_provider!.currentPosition!.latitude,
-                    _provider!.currentPosition!.longitude));
+                return _buildMap(
+                  CameraPosition(
+                    target: LatLng(
+                      _provider!.currentPosition!.latitude,
+                      _provider!.currentPosition!.longitude,
+                    ),
+                  ),
+                );
               }
             }
           });
@@ -474,16 +486,16 @@ class _PlacePickerState extends State<PlacePicker> {
           if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            return _buildMap(widget.initialPosition);
+            return _buildMap(widget.initialCameraPosition);
           }
         },
       );
     }
   }
 
-  Widget _buildMap(LatLng initialTarget) {
+  Widget _buildMap(CameraPosition initialCameraPosition) {
     return GoogleMapPlacePicker(
-      initialTarget: initialTarget,
+      initialCameraPosition: initialCameraPosition,
       appBarKey: _appBarKey,
       selectedPlaceWidgetBuilder: widget.selectedPlaceWidgetBuilder,
       pinBuilder: widget.pinBuilder,
@@ -498,6 +510,9 @@ class _PlacePickerState extends State<PlacePicker> {
       language: widget.autocompleteLanguage,
       circleValidation: widget.circleValidation,
       polygonValidation: widget.polygonValidation,
+      circles: widget.circles,
+      polygons: widget.polygons,
+      polylines: widget.polylines,
       forceSearchOnZoomChanged: widget.forceSearchOnZoomChanged,
       hidePlaceDetailsWhenDraggingPin: widget.hidePlaceDetailsWhenDraggingPin,
       selectText: widget.selectText,

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -8,8 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
-import 'package:google_maps_place_picker_validation/src/models/polygon_validation.dart';
-import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -27,7 +24,7 @@ typedef PinBuilder = Widget Function(
 );
 
 class GoogleMapPlacePicker extends StatelessWidget {
-  final LatLng initialTarget;
+  final CameraPosition initialCameraPosition;
   final GlobalKey appBarKey;
 
   final SelectedPlaceWidgetBuilder? selectedPlaceWidgetBuilder;
@@ -76,7 +73,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
 
   const GoogleMapPlacePicker({
     Key? key,
-    required this.initialTarget,
+    required this.initialCameraPosition,
     required this.appBarKey,
     this.selectedPlaceWidgetBuilder,
     this.pinBuilder,
@@ -193,8 +190,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
       selector: (_, provider) => provider.mapType,
       builder: (_, data, __) {
         PlaceProvider provider = PlaceProvider.of(context, listen: false);
-        CameraPosition initialCameraPosition =
-            CameraPosition(target: initialTarget, zoom: 15);
 
         return GoogleMap(
           zoomGesturesEnabled: zoomGesturesEnabled,
@@ -257,6 +252,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
             provider.pinState = PinState.Idle;
 
             validate(provider);
+
             if (onCameraIdle != null) {
               onCameraIdle!(provider);
             }
@@ -300,24 +296,23 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   void validate(PlaceProvider provider) {
-    provider.setPrevCameraPosition(provider.cameraPosition);
-    if (provider.prevCameraPosition != null) {
-      if (circleValidation != null) {
-        if (circleValidation!
-            .checkIsNotValid(provider.prevCameraPosition!.target)) {
-          provider.setPrevCameraPosition(provider.cameraPosition);
-          provider.mapController?.animateCamera(
-            CameraUpdate.newLatLng(circleValidation!.center),
-          );
-        }
-      } else if (polygonValidation != null) {
-        if (polygonValidation!
-            .checkIsNotValid(provider.prevCameraPosition!.target)) {
-          provider.setPrevCameraPosition(provider.cameraPosition);
-          provider.mapController?.animateCamera(
-            CameraUpdate.newLatLng(polygonValidation!.center),
-          );
-        }
+    if (provider.validate) return;
+
+    if (circleValidation != null) {
+      if (circleValidation!
+          .checkIsNotValid(provider.prevCameraPosition!.target)) {
+        provider.setPrevCameraPosition(provider.cameraPosition);
+        provider.mapController?.animateCamera(
+          CameraUpdate.newLatLng(circleValidation!.center),
+        );
+      }
+    } else if (polygonValidation != null) {
+      if (polygonValidation!
+          .checkIsNotValid(provider.prevCameraPosition!.target)) {
+        provider.setPrevCameraPosition(provider.cameraPosition);
+        provider.mapController?.animateCamera(
+          CameraUpdate.newLatLng(polygonValidation!.center),
+        );
       }
     }
   }

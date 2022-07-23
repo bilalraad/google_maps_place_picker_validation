@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_place_picker_validation/src/scales_zoom_level.dart';
 import 'package:uuid/uuid.dart';
+
+LatLngBounds farthestBounds(List<LatLng> list) {
+  assert(list.length > 2);
+  double? x0, y0, x1, y1;
+  for (LatLng latLng in list) {
+    if (x0 == null) {
+      x0 = x1 = latLng.latitude;
+      y0 = y1 = latLng.longitude;
+    } else {
+      if (latLng.latitude > x1!) x1 = latLng.latitude;
+      if (latLng.latitude < x0) x0 = latLng.latitude;
+      if (latLng.longitude > y1!) y1 = latLng.longitude;
+      if (latLng.longitude < y0!) y0 = latLng.longitude;
+    }
+  }
+  return LatLngBounds(northeast: LatLng(x1!, y1!), southwest: LatLng(x0!, y0!));
+}
 
 class PolygonValidation extends Polygon {
   final bool validation;
@@ -20,7 +39,7 @@ class PolygonValidation extends Polygon {
         );
 
   bool checkIsValid(LatLng point) {
-    return !checkIfValidMarker(point);
+    return checkIfValidMarker(point);
   }
 
   bool checkIsNotValid(LatLng point) {
@@ -39,7 +58,7 @@ class Path {
   Path(this.a, this.b);
 }
 
-extension on Polygon {
+extension PolygonExtension on Polygon {
   int get edgesCount => points.length - 1;
 
   List<LatLng> get vertices => points;
@@ -47,6 +66,18 @@ extension on Polygon {
   Path getPath(int i) {
     return Path(vertices[i], vertices[i + 1]);
   }
+
+  LatLngBounds get bounds => farthestBounds(points);
+
+  CameraPosition cameraPosition(double padding) => CameraPosition(
+        target: calculateCenter(),
+        zoom: distanceToZoom(
+          distanceBetween(bounds.northeast, bounds.southwest),
+        ),
+      );
+
+  CameraUpdate cameraUpdate(double padding) =>
+      CameraUpdate.newLatLngBounds(bounds, padding);
 
   LatLng calculateCenter() {
     final longitudes = points.map((i) => i.longitude).toList();

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -86,7 +87,10 @@ class _HomePageState extends State<HomePage> {
                       searchingText: "Please wait ...",
                       selectText: "Select place",
                       outsideOfPickAreaText: "Place not in area",
-                      initialPosition: HomePage.kInitialPosition,
+                      initialCameraPosition: const CameraPosition(
+                        target: HomePage.kInitialPosition,
+                        zoom: 10,
+                      ),
                       useCurrentLocation: true,
                       selectInitialPosition: true,
                       usePinPointingSearch: true,
@@ -128,7 +132,10 @@ class _HomePageState extends State<HomePage> {
             searchingText: "Please wait ...",
             selectText: "Select place",
             outsideOfPickAreaText: "Place not in area",
-            initialPosition: polygonValidation.center,
+            initialCameraPosition: polygonValidation.cameraPosition(1),
+            onCameraMove: (position) {
+              log("zoom-distance ${position.zoom}");
+            },
             // circleValidation: CircleValidation(
             //   center: HomePage.kInitialPosition,
             //   radius: 500,
@@ -136,11 +143,37 @@ class _HomePageState extends State<HomePage> {
             //   strokeColor: Colors.red,
             // ),
             polygonValidation: polygonValidation,
+            polylines: {
+              Polyline(
+                polylineId: const PolylineId("polylineId"),
+                points: [
+                  polygonValidation.bounds.northeast,
+                  polygonValidation.bounds.southwest,
+                ],
+                color: Colors.red,
+                width: 2,
+              )
+            },
             selectInitialPosition: true,
             usePinPointingSearch: true,
             usePlaceDetailSearch: true,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: true,
+            selectedPlaceWidgetBuilder:
+                (context, selectedPlace, state, isSearchBarFocused) {
+              print("LOG: selectedPlace ${selectedPlace?.geometry?.location}");
+              return Column(
+                children: [
+                  Container(
+                    height: 200,
+                    width: 200,
+                    padding: const EdgeInsets.only(top: 100),
+                    color: Colors.red,
+                    child: Text("${selectedPlace?.formattedAddress}"),
+                  ),
+                ],
+              );
+            },
             onPlacePicked: (PickResult result) {
               setState(() {
                 selectedPlace = result;
