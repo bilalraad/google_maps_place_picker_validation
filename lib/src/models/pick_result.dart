@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -59,6 +60,15 @@ class PickResult {
         : LatLng(geometry!.location.lat, geometry!.location.lng);
   }
 
+  String cleanFormattedText({String separator = " - "}) {
+    final list = formattedAddress?.split(" ");
+    list?.removeWhere((element) => element.contains("+"));
+    final newValue = list
+        ?.map((e) => e.replaceAll(",", "").replaceAll("،", "").trim())
+        .toList();
+    return newValue?.join(separator) ?? "";
+  }
+
   factory PickResult.fromGeocodingResult(GeocodingResult result) {
     return PickResult(
       placeId: result.placeId,
@@ -94,5 +104,10 @@ class PickResult {
       website: result.website,
       reviews: result.reviews,
     );
+  }
+
+  @override
+  String toString() {
+    return 'PickResult(placeId: $placeId, geometry: $geometry, formattedAddress: $formattedAddress, types: $types, addressComponents: $addressComponents, adrAddress: $adrAddress, formattedPhoneNumber: $formattedPhoneNumber, id: $id, reference: $reference, icon: $icon, name: $name, openingHours: $openingHours, photos: $photos, internationalPhoneNumber: $internationalPhoneNumber, priceLevel: $priceLevel, rating: $rating, scope: $scope, url: $url, vicinity: $vicinity, utcOffset: $utcOffset, website: $website, reviews: $reviews)';
   }
 }

@@ -132,6 +132,7 @@ class _HomePageState extends State<HomePage> {
             searchingText: "Please wait ...",
             selectText: "Select place",
             outsideOfPickAreaText: "Place not in area",
+            autocompleteLanguage: "ar",
             initialCameraPosition: polygonValidation.cameraPosition(1),
             onCameraMove: (position) {
               log("zoom-distance ${position.zoom}");
@@ -161,17 +162,16 @@ class _HomePageState extends State<HomePage> {
             zoomControlsEnabled: true,
             selectedPlaceWidgetBuilder:
                 (context, selectedPlace, state, isSearchBarFocused) {
-              print("LOG: selectedPlace ${selectedPlace?.geometry?.location}");
-              return Column(
-                children: [
-                  Container(
-                    height: 200,
-                    width: 200,
-                    padding: const EdgeInsets.only(top: 100),
-                    color: Colors.red,
-                    child: Text("${selectedPlace?.formattedAddress}"),
-                  ),
-                ],
+              return SafeArea(
+                child: Column(
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      alignment: Alignment.center,
+                      child: Text("${selectedPlace?.cleanFormattedText()}"),
+                    ),
+                  ],
+                ),
               );
             },
             onPlacePicked: (PickResult result) {

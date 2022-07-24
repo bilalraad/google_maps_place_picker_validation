@@ -12,7 +12,6 @@ import 'package:google_maps_place_picker_validation/providers/place_provider.dar
 import 'package:google_maps_place_picker_validation/src/autocomplete_search.dart';
 import 'package:google_maps_place_picker_validation/src/controllers/autocomplete_search_controller.dart';
 import 'package:google_maps_place_picker_validation/src/google_map_place_picker.dart';
-import 'package:google_maps_place_picker_validation/src/models/polygon_validation.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -374,31 +373,30 @@ class _PlacePickerState extends State<PlacePicker> {
             : const SizedBox(width: 15),
         Expanded(
           child: AutoCompleteSearch(
-              appBarKey: _appBarKey,
-              searchBarController: _searchBarController,
-              sessionToken: _provider!.sessionToken,
-              hintText: widget.hintText,
-              searchingText: widget.searchingText,
-              debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
-              onPicked: (prediction) {
-                _pickPrediction(prediction);
-              },
-              onSearchFailed: (status) {
-                if (widget.onAutoCompleteFailed != null) {
-                  widget.onAutoCompleteFailed!(status);
-                }
-              },
-              autocompleteOffset: widget.autocompleteOffset,
-              autocompleteRadius: widget.autocompleteRadius,
-              autocompleteLanguage: widget.autocompleteLanguage,
-              autocompleteComponents: widget.autocompleteComponents,
-              autocompleteTypes: widget.autocompleteTypes,
-              strictbounds: widget.strictbounds,
-              region: widget.region,
-              initialSearchString: widget.initialSearchString,
-              searchForInitialValue: widget.searchForInitialValue,
-              autocompleteOnTrailingWhitespace:
-                  widget.autocompleteOnTrailingWhitespace),
+            appBarKey: _appBarKey,
+            searchBarController: _searchBarController,
+            sessionToken: _provider!.sessionToken,
+            hintText: widget.hintText,
+            searchingText: widget.searchingText,
+            debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
+            onPicked: _pickPrediction,
+            onSearchFailed: (status) {
+              if (widget.onAutoCompleteFailed != null) {
+                widget.onAutoCompleteFailed!(status);
+              }
+            },
+            autocompleteOffset: widget.autocompleteOffset,
+            autocompleteRadius: widget.autocompleteRadius,
+            autocompleteLanguage: widget.autocompleteLanguage,
+            autocompleteComponents: widget.autocompleteComponents,
+            autocompleteTypes: widget.autocompleteTypes,
+            strictbounds: widget.strictbounds,
+            region: widget.region,
+            initialSearchString: widget.initialSearchString,
+            searchForInitialValue: widget.searchForInitialValue,
+            autocompleteOnTrailingWhitespace:
+                widget.autocompleteOnTrailingWhitespace,
+          ),
         ),
         const SizedBox(width: 5),
       ],
@@ -535,9 +533,7 @@ class _PlacePickerState extends State<PlacePicker> {
           await _moveToCurrentPosition();
         }
       },
-      onMoveStart: () {
-        _searchBarController.reset();
-      },
+      onMoveStart: _searchBarController.reset,
       onPlacePicked: widget.onPlacePicked,
       onCameraMoveStarted: widget.onCameraMoveStarted,
       onCameraMove: widget.onCameraMove,
@@ -549,30 +545,33 @@ class _PlacePickerState extends State<PlacePicker> {
 
   Widget _buildIntroModal(BuildContext context) {
     return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-      return _showintroModal && widget.introModalWidgetBuilder != null
-          ? Stack(children: [
-              const Positioned(
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                child: Material(
-                  type: MaterialType.canvas,
-                  color: Color.fromARGB(128, 0, 0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+      builder: (BuildContext context, StateSetter setState) {
+        return _showintroModal && widget.introModalWidgetBuilder != null
+            ? Stack(
+                children: [
+                  const Positioned(
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0,
+                    child: Material(
+                      type: MaterialType.canvas,
+                      color: Color.fromARGB(128, 0, 0, 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero,
+                      ),
+                      child: ClipRect(),
+                    ),
                   ),
-                  child: ClipRect(),
-                ),
-              ),
-              widget.introModalWidgetBuilder!(context, () {
-                setState(() {
-                  _showintroModal = false;
-                });
-              })
-            ])
-          : Container();
-    });
+                  widget.introModalWidgetBuilder!(context, () {
+                    setState(() {
+                      _showintroModal = false;
+                    });
+                  })
+                ],
+              )
+            : Container();
+      },
+    );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_place_picker_validation/src/models/shape_validation.dart';
 import 'package:google_maps_place_picker_validation/src/scales_zoom_level.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,7 +21,7 @@ LatLngBounds farthestBounds(List<LatLng> list) {
   return LatLngBounds(northeast: LatLng(x1!, y1!), southwest: LatLng(x0!, y0!));
 }
 
-class PolygonValidation extends Polygon {
+class PolygonValidation extends Polygon implements ShapeValidation {
   final bool validation;
   PolygonValidation({
     required List<LatLng> points,
@@ -38,14 +38,17 @@ class PolygonValidation extends Polygon {
           strokeWidth: strokeWidth,
         );
 
+  @override
   bool checkIsValid(LatLng point) {
     return checkIfValidMarker(point);
   }
 
+  @override
   bool checkIsNotValid(LatLng point) {
     return !checkIsValid(point);
   }
 
+  @override
   LatLng get center {
     return calculateCenter();
   }

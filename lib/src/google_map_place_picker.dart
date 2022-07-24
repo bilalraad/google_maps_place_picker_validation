@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
+import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -41,7 +43,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
   final bool? enableMapTypeButton;
   final bool? enableMyLocationButton;
 
-  final bool? usePinPointingSearch;
+  final bool usePinPointingSearch;
   final bool? usePlaceDetailSearch;
 
   final bool? selectInitialPosition;
@@ -52,7 +54,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
   final PolygonValidation? polygonValidation;
 
   final bool? forceSearchOnZoomChanged;
-  final bool? hidePlaceDetailsWhenDraggingPin;
+  final bool hidePlaceDetailsWhenDraggingPin;
 
   final Set<Circle> circles;
   final Set<Polygon> polygons;
@@ -75,6 +77,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
     Key? key,
     required this.initialCameraPosition,
     required this.appBarKey,
+    required this.usePinPointingSearch,
+    required this.hidePlaceDetailsWhenDraggingPin,
     this.selectedPlaceWidgetBuilder,
     this.pinBuilder,
     this.onSearchFailed,
@@ -86,14 +90,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
     this.onToggleMapType,
     this.onMyLocation,
     this.onPlacePicked,
-    this.usePinPointingSearch,
     this.usePlaceDetailSearch,
     this.selectInitialPosition,
     this.language,
     this.circleValidation,
     this.polygonValidation,
     this.forceSearchOnZoomChanged,
-    this.hidePlaceDetailsWhenDraggingPin,
     this.onCameraMoveStarted,
     this.onCameraMove,
     this.onCameraIdle,
@@ -226,6 +228,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
             }
           },
           onCameraIdle: () {
+            if (kDebugMode) {
+              developer.log(
+                "selected-place \nselectedPlace: ${provider.selectedPlace?.cleanFormattedText()}, \nplaceSearchingState: ${provider.placeSearchingState}, \nisSearchBarFocused: ${provider.isSearchBarFocused}, \npinState: ${provider.pinState} \nprevCameraPosition: ${provider.prevCameraPosition}\nisAutoCompleteSearching: ${provider.isAutoCompleteSearching}\nvalidate: ${_validate(provider)}\n",
+              );
+            }
+
             if (provider.isAutoCompleteSearching) {
               provider.isAutoCompleteSearching = false;
               provider.pinState = PinState.Idle;
@@ -233,8 +241,13 @@ class GoogleMapPlacePicker extends StatelessWidget {
               return;
             }
 
+            if (circleValidation != null || polygonValidation != null) {
+              final isValid = _validate(provider);
+              if (!isValid) return;
+            }
+
             // Perform search only if the setting is to true.
-            if (usePinPointingSearch!) {
+            if (usePinPointingSearch) {
               // Search current camera location only if camera has moved (dragged) before.
               if (provider.pinState == PinState.Dragging) {
                 // Cancel previous timer.
@@ -250,8 +263,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
             }
 
             provider.pinState = PinState.Idle;
-
-            validate(provider);
 
             if (onCameraIdle != null) {
               onCameraIdle!(provider);
@@ -271,7 +282,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
             provider.pinState = PinState.Dragging;
 
             // Begins the search state if the hide details is enabled
-            if (hidePlaceDetailsWhenDraggingPin!) {
+            if (hidePlaceDetailsWhenDraggingPin) {
               provider.placeSearchingState = SearchingState.Searching;
             }
 
@@ -295,26 +306,28 @@ class GoogleMapPlacePicker extends StatelessWidget {
     );
   }
 
-  void validate(PlaceProvider provider) {
-    if (provider.validate) return;
+  bool _validate(PlaceProvider provider) {
+    bool isValid = false;
+
+    final location = provider.cameraPosition?.target;
+    if (location == null) return false;
 
     if (circleValidation != null) {
-      if (circleValidation!
-          .checkIsNotValid(provider.prevCameraPosition!.target)) {
-        provider.setPrevCameraPosition(provider.cameraPosition);
+      isValid = circleValidation!.checkIsValid(location);
+      if (!isValid) {
         provider.mapController?.animateCamera(
           CameraUpdate.newLatLng(circleValidation!.center),
         );
       }
     } else if (polygonValidation != null) {
-      if (polygonValidation!
-          .checkIsNotValid(provider.prevCameraPosition!.target)) {
-        provider.setPrevCameraPosition(provider.cameraPosition);
+      isValid = polygonValidation!.checkIsValid(location);
+      if (!isValid) {
         provider.mapController?.animateCamera(
           CameraUpdate.newLatLng(polygonValidation!.center),
         );
       }
     }
+    return isValid;
   }
 
   Widget _buildPin() {
@@ -396,15 +409,16 @@ class GoogleMapPlacePicker extends StatelessWidget {
     return Selector<PlaceProvider,
         Tuple4<PickResult?, SearchingState, bool, PinState>>(
       selector: (_, provider) => Tuple4(
-          provider.selectedPlace,
-          provider.placeSearchingState,
-          provider.isSearchBarFocused,
-          provider.pinState),
+        provider.selectedPlace,
+        provider.placeSearchingState,
+        provider.isSearchBarFocused,
+        provider.pinState,
+      ),
       builder: (context, data, __) {
         if ((data.item1 == null && data.item2 == SearchingState.Idle) ||
             data.item3 == true ||
             data.item4 == PinState.Dragging &&
-                hidePlaceDetailsWhenDraggingPin!) {
+                hidePlaceDetailsWhenDraggingPin) {
           return Container();
         } else {
           if (selectedPlaceWidgetBuilder == null) {

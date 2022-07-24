@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_place_picker_validation/src/models/shape_validation.dart';
 import 'package:uuid/uuid.dart';
 
-class CircleValidation extends Circle {
+class CircleValidation extends Circle implements ShapeValidation {
   final bool validation;
   CircleValidation({
     required LatLng center,
@@ -22,6 +23,7 @@ class CircleValidation extends Circle {
           strokeWidth: strokeWidth,
         );
 
+  @override
   bool checkIsValid(LatLng point) {
     final distance = Geolocator.distanceBetween(
       center.latitude,
@@ -34,6 +36,7 @@ class CircleValidation extends Circle {
     return valid;
   }
 
+  @override
   bool checkIsNotValid(LatLng point) {
     return !checkIsValid(point);
   }
