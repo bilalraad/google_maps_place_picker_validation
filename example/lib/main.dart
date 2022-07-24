@@ -143,18 +143,18 @@ class _HomePageState extends State<HomePage> {
             //   strokeWidth: 2,
             //   strokeColor: Colors.red,
             // ),
-            polygonValidation: polygonValidation,
-            polylines: {
-              Polyline(
-                polylineId: const PolylineId("polylineId"),
-                points: [
-                  polygonValidation.bounds.northeast,
-                  polygonValidation.bounds.southwest,
-                ],
-                color: Colors.red,
-                width: 2,
-              )
-            },
+            // polygonValidation: polygonValidation,
+            // polylines: {
+            //   Polyline(
+            //     polylineId: const PolylineId("polylineId"),
+            //     points: [
+            //       polygonValidation.bounds.northeast,
+            //       polygonValidation.bounds.southwest,
+            //     ],
+            //     color: Colors.red,
+            //     width: 2,
+            //   )
+            // },
             selectInitialPosition: true,
             usePinPointingSearch: true,
             usePlaceDetailSearch: true,

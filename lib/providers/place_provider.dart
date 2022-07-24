@@ -120,13 +120,6 @@ class PlaceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get validate {
-    return (selectedPlace == null &&
-            placeSearchingState == SearchingState.Idle) ||
-        isSearchBarFocused == true ||
-        pinState == PinState.Dragging;
-  }
-
   GoogleMapController? _mapController;
   GoogleMapController? get mapController => _mapController;
   set mapController(GoogleMapController? controller) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -8,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker_validation/providers/place_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
-import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
+import 'package:google_maps_place_picker_validation/src/models/shape_validation.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -228,12 +227,6 @@ class GoogleMapPlacePicker extends StatelessWidget {
             }
           },
           onCameraIdle: () {
-            if (kDebugMode) {
-              developer.log(
-                "selected-place \nselectedPlace: ${provider.selectedPlace?.cleanFormattedText()}, \nplaceSearchingState: ${provider.placeSearchingState}, \nisSearchBarFocused: ${provider.isSearchBarFocused}, \npinState: ${provider.pinState} \nprevCameraPosition: ${provider.prevCameraPosition}\nisAutoCompleteSearching: ${provider.isAutoCompleteSearching}\nvalidate: ${_validate(provider)}\n",
-              );
-            }
-
             if (provider.isAutoCompleteSearching) {
               provider.isAutoCompleteSearching = false;
               provider.pinState = PinState.Idle;
@@ -242,8 +235,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
             }
 
             if (circleValidation != null || polygonValidation != null) {
-              final isValid = _validate(provider);
-              if (!isValid) return;
+              final isValid = _checkLocationValidation(provider);
+              if (isValid) return;
             }
 
             // Perform search only if the setting is to true.
@@ -306,27 +299,22 @@ class GoogleMapPlacePicker extends StatelessWidget {
     );
   }
 
-  bool _validate(PlaceProvider provider) {
+  bool _checkLocationValidation(PlaceProvider provider) {
     bool isValid = false;
 
     final location = provider.cameraPosition?.target;
     if (location == null) return false;
 
-    if (circleValidation != null) {
-      isValid = circleValidation!.checkIsValid(location);
-      if (!isValid) {
+    ShapeValidation? validator = circleValidation ?? polygonValidation;
+    if (validator != null) {
+      isValid = validator.checkIsNotValid(location);
+      if (isValid) {
         provider.mapController?.animateCamera(
-          CameraUpdate.newLatLng(circleValidation!.center),
-        );
-      }
-    } else if (polygonValidation != null) {
-      isValid = polygonValidation!.checkIsValid(location);
-      if (!isValid) {
-        provider.mapController?.animateCamera(
-          CameraUpdate.newLatLng(polygonValidation!.center),
+          CameraUpdate.newLatLng(validator.center),
         );
       }
     }
+
     return isValid;
   }
 
