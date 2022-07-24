@@ -306,7 +306,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
     if (location == null) return false;
 
     ShapeValidation? validator = circleValidation ?? polygonValidation;
-    if (validator != null) {
+    if (validator != null && validator.validation) {
       isValid = validator.checkIsNotValid(location);
       if (isValid) {
         provider.mapController?.animateCamera(

@@ -5,7 +5,9 @@ import 'package:google_maps_place_picker_validation/src/models/shape_validation.
 import 'package:uuid/uuid.dart';
 
 class CircleValidation extends Circle implements ShapeValidation {
+  @override
   final bool validation;
+
   CircleValidation({
     required LatLng center,
     required double radius,

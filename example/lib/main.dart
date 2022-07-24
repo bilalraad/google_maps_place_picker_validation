@@ -120,7 +120,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onLoadGoogleMapPressed() {
-    final polygonValidation = PolygonValidation(points: polygon);
+    final polygonValidation =
+        PolygonValidation(points: polygon, validation: false);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -143,37 +144,12 @@ class _HomePageState extends State<HomePage> {
             //   strokeWidth: 2,
             //   strokeColor: Colors.red,
             // ),
-            // polygonValidation: polygonValidation,
-            // polylines: {
-            //   Polyline(
-            //     polylineId: const PolylineId("polylineId"),
-            //     points: [
-            //       polygonValidation.bounds.northeast,
-            //       polygonValidation.bounds.southwest,
-            //     ],
-            //     color: Colors.red,
-            //     width: 2,
-            //   )
-            // },
+            polygonValidation: polygonValidation,
             selectInitialPosition: true,
             usePinPointingSearch: true,
             usePlaceDetailSearch: true,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: true,
-            selectedPlaceWidgetBuilder:
-                (context, selectedPlace, state, isSearchBarFocused) {
-              return SafeArea(
-                child: Column(
-                  children: [
-                    Container(
-                      color: Colors.white,
-                      alignment: Alignment.center,
-                      child: Text("${selectedPlace?.cleanFormattedText()}"),
-                    ),
-                  ],
-                ),
-              );
-            },
             onPlacePicked: (PickResult result) {
               setState(() {
                 selectedPlace = result;

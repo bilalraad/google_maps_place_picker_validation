@@ -22,7 +22,9 @@ LatLngBounds farthestBounds(List<LatLng> list) {
 }
 
 class PolygonValidation extends Polygon implements ShapeValidation {
+  @override
   final bool validation;
+  
   PolygonValidation({
     required List<LatLng> points,
     Color? fillColor,
