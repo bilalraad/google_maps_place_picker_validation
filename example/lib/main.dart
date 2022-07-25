@@ -51,6 +51,17 @@ class _HomePageState extends State<HomePage> {
   PickResult? selectedPlace;
   bool showGoogleMapInContainer = false;
 
+  static final polygonValidation = PolygonValidation(points: polygon);
+
+  Circle _circle = Circle(
+    circleId: const CircleId("circleId"),
+    center: polygonValidation.center,
+    radius: 1000,
+    zIndex: 2,
+    strokeColor: Colors.red,
+    strokeWidth: 1,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,8 +131,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onLoadGoogleMapPressed() {
-    final polygonValidation =
-        PolygonValidation(points: polygon, validation: false);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -135,16 +144,9 @@ class _HomePageState extends State<HomePage> {
             outsideOfPickAreaText: "Place not in area",
             autocompleteLanguage: "ar",
             initialCameraPosition: polygonValidation.cameraPosition(1),
-            onCameraMove: (position) {
-              log("zoom-distance ${position.zoom}");
-            },
-            // circleValidation: CircleValidation(
-            //   center: HomePage.kInitialPosition,
-            //   radius: 500,
-            //   strokeWidth: 2,
-            //   strokeColor: Colors.red,
-            // ),
             polygonValidation: polygonValidation,
+            circles: {_circle},
+            circlePin: _circle,
             selectInitialPosition: true,
             usePinPointingSearch: true,
             usePlaceDetailSearch: true,

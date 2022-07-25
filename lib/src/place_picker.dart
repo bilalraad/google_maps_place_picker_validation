@@ -30,8 +30,8 @@ class PlacePicker extends StatefulWidget {
   const PlacePicker({
     Key? key,
     required this.apiKey,
-    this.onPlacePicked,
     required this.initialCameraPosition,
+    this.onPlacePicked,
     this.useCurrentLocation,
     this.desiredLocationAccuracy = LocationAccuracy.high,
     this.onMapCreated,
@@ -79,9 +79,11 @@ class PlacePicker extends StatefulWidget {
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
     this.polygonValidation,
+    this.circlePin,
     this.circles = const {},
     this.polygons = const {},
     this.polylines = const {},
+    this.circle,
   }) : super(key: key);
 
   final String apiKey;
@@ -119,6 +121,8 @@ class PlacePicker extends StatefulWidget {
   /// If set the picker can only pick addresses in the given circle area.
   /// The section will be highlighted.
   final CircleValidation? circleValidation;
+
+  final Circle? circle;
 
   /// If set the picker can only pick addresses in the given polygon area.
   /// The section will be highlighted.
@@ -230,7 +234,7 @@ class PlacePicker extends StatefulWidget {
 
   /// Called when camera movement has ended, there are no pending
   /// animations and the user has stopped interacting with the map.
-  final Function(PlaceProvider)? onCameraIdle;
+  final Function(CameraPosition cameraPosition)? onCameraIdle;
 
   /// Called when the map type has been changed.
   final Function(MapType)? onMapTypeChanged;
@@ -240,8 +244,13 @@ class PlacePicker extends StatefulWidget {
   final bool zoomControlsEnabled;
 
   final Set<Circle> circles;
+
+  final Circle? circlePin;
+
   final Set<Polygon> polygons;
+
   final Set<Polyline> polylines;
+
   @override
   State<PlacePicker> createState() => _PlacePickerState();
 }

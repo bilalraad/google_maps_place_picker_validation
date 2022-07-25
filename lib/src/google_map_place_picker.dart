@@ -56,13 +56,15 @@ class GoogleMapPlacePicker extends StatelessWidget {
   final bool hidePlaceDetailsWhenDraggingPin;
 
   final Set<Circle> circles;
+
   final Set<Polygon> polygons;
+
   final Set<Polyline> polylines;
 
   /// GoogleMap pass-through events:
   final Function(PlaceProvider)? onCameraMoveStarted;
   final CameraPositionCallback? onCameraMove;
-  final Function(PlaceProvider)? onCameraIdle;
+  final Function(CameraPosition cameraPosition)? onCameraIdle;
 
   // strings
   final String? selectText;
@@ -258,7 +260,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
             provider.pinState = PinState.Idle;
 
             if (onCameraIdle != null) {
-              onCameraIdle!(provider);
+              onCameraIdle!(provider.cameraPosition!);
             }
           },
           onCameraMoveStarted: () {
