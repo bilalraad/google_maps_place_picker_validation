@@ -265,7 +265,6 @@ class _PlacePickerState extends State<PlacePicker> {
   @override
   void initState() {
     super.initState();
-
     _futureProvider = _initPlaceProvider();
   }
 
@@ -518,6 +517,7 @@ class _PlacePickerState extends State<PlacePicker> {
       circleValidation: widget.circleValidation,
       polygonValidation: widget.polygonValidation,
       circles: widget.circles,
+      circlePin: widget.circlePin,
       polygons: widget.polygons,
       polylines: widget.polylines,
       forceSearchOnZoomChanged: widget.forceSearchOnZoomChanged,

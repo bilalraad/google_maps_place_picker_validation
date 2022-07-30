@@ -28,7 +28,9 @@ dependencies:
 
   google_maps_place_picker_validation:
     path: ../
-  google_maps_flutter: ^2.1.5
+  google_maps_flutter: ^2.1.9
+  map_utils:
+    git: https://github.com/masreplay/map_utils.git
 
 dev_dependencies:
   flutter_test:

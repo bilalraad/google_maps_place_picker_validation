@@ -1,10 +1,10 @@
-import 'dart:developer';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker_validation/google_maps_place_picker.dart';
+import 'package:map_utils/polygon_extension.dart';
 
 // Your api key storage.
 import 'keys.dart';
@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
     radius: 1000,
     zIndex: 2,
     strokeColor: Colors.red,
-    strokeWidth: 1,
+    strokeWidth: 2,
   );
 
   @override
@@ -143,9 +143,8 @@ class _HomePageState extends State<HomePage> {
             selectText: "Select place",
             outsideOfPickAreaText: "Place not in area",
             autocompleteLanguage: "ar",
-            initialCameraPosition: polygonValidation.cameraPosition(1),
+            initialCameraPosition: polygonValidation.getCameraPosition(),
             polygonValidation: polygonValidation,
-            circles: {_circle},
             circlePin: _circle,
             selectInitialPosition: true,
             usePinPointingSearch: true,
@@ -156,6 +155,11 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 selectedPlace = result;
                 Navigator.of(context).pop();
+              });
+            },
+            onCameraMove: (position) {
+              setState(() {
+                _circle = _circle.copyWith(centerParam: position.target);
               });
             },
             onMapTypeChanged: (MapType mapType) {
