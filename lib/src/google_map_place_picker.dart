@@ -68,7 +68,7 @@ class GoogleMapPlacePicker extends StatefulWidget {
   /// GoogleMap pass-through events:
   final Function(PlaceProvider)? onCameraMoveStarted;
   final CameraPositionCallback? onCameraMove;
-  final Function(CameraPosition cameraPosition)? onCameraIdle;
+  final Function(CameraPosition? cameraPosition)? onCameraIdle;
 
   // strings
   final String? selectText;
@@ -289,7 +289,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
             provider.pinState = PinState.Idle;
 
             if (widget.onCameraIdle != null) {
-              widget.onCameraIdle!(provider.cameraPosition!);
+              widget.onCameraIdle!(provider.cameraPosition);
             }
           },
           onCameraMoveStarted: () {

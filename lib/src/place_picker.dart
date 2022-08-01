@@ -234,7 +234,7 @@ class PlacePicker extends StatefulWidget {
 
   /// Called when camera movement has ended, there are no pending
   /// animations and the user has stopped interacting with the map.
-  final Function(CameraPosition cameraPosition)? onCameraIdle;
+  final Function(CameraPosition? cameraPosition)? onCameraIdle;
 
   /// Called when the map type has been changed.
   final Function(MapType)? onMapTypeChanged;
