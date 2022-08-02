@@ -44,6 +44,7 @@ class PlacePicker extends StatefulWidget {
     this.proxyBaseUrl,
     this.httpClient,
     this.selectedPlaceWidgetBuilder,
+    this.notSelectedPlaceWidgetBuilder,
     this.pinBuilder,
     this.introModalWidgetBuilder,
     this.autoCompleteDebounceInMilliseconds = 500,
@@ -152,6 +153,8 @@ class PlacePicker extends StatefulWidget {
   /// It is provided by default if you leave it as a null.
   /// IMPORTANT: If this is non-null, [onPlacePicked] will not be invoked, as there will be no default 'Select here' button.
   final SelectedPlaceWidgetBuilder? selectedPlaceWidgetBuilder;
+
+  final Widget Function()? notSelectedPlaceWidgetBuilder;
 
   /// optional - builds customized pin widget which indicates current pointing position.
   ///
@@ -516,6 +519,7 @@ class _PlacePickerState extends State<PlacePicker> {
       language: widget.autocompleteLanguage,
       circleValidation: widget.circleValidation,
       polygonValidation: widget.polygonValidation,
+      notSelectedPlaceWidgetBuilder: widget.notSelectedPlaceWidgetBuilder,
       circles: widget.circles,
       circlePin: widget.circlePin,
       polygons: widget.polygons,

@@ -30,6 +30,7 @@ class GoogleMapPlacePicker extends StatefulWidget {
   final GlobalKey appBarKey;
 
   final SelectedPlaceWidgetBuilder? selectedPlaceWidgetBuilder;
+  final Widget Function()? notSelectedPlaceWidgetBuilder;
   final PinBuilder? pinBuilder;
 
   final ValueChanged<String>? onSearchFailed;
@@ -111,7 +112,7 @@ class GoogleMapPlacePicker extends StatefulWidget {
     this.zoomControlsEnabled = false,
     this.circles = const {},
     this.polygons = const {},
-    this.polylines = const {},
+    this.polylines = const {}, this.notSelectedPlaceWidgetBuilder,
   })  : assert(polygonValidation == null || circleValidation == null),
         super(key: key);
 
@@ -440,7 +441,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
             data.item3 == true ||
             data.item4 == PinState.Dragging &&
                 widget.hidePlaceDetailsWhenDraggingPin) {
-          return Container();
+          return widget.notSelectedPlaceWidgetBuilder?.call() ?? Container();
         } else {
           if (widget.selectedPlaceWidgetBuilder == null) {
             return _defaultPlaceWidgetBuilder(context, data.item1, data.item2);
