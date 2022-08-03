@@ -224,7 +224,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8b12e97f6fec0efc7778c58c20af593fd7d0dda6"
+      resolved-ref: "63f8a4c6dda60250c9a8b6de098421bb860efec3"
       url: "https://github.com/masreplay/map_utils.git"
     source: git
     version: "0.0.1"

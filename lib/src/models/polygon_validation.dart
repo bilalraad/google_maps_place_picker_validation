@@ -27,7 +27,7 @@ class PolygonValidation extends Polygon implements ShapeValidation {
 
   @override
   bool checkIsValid(LatLng point) {
-    return checkIfValidMarker(point);
+    return contains(point);
   }
 
   @override
