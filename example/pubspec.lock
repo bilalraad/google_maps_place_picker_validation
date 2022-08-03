@@ -237,7 +237,7 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "63f8a4c6dda60250c9a8b6de098421bb860efec3"
+      ref: HEAD
       resolved-ref: "63f8a4c6dda60250c9a8b6de098421bb860efec3"
       url: "https://github.com/masreplay/map_utils.git"
     source: git
