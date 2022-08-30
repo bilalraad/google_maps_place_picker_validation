@@ -112,7 +112,8 @@ class GoogleMapPlacePicker extends StatefulWidget {
     this.zoomControlsEnabled = false,
     this.circles = const {},
     this.polygons = const {},
-    this.polylines = const {}, this.notSelectedPlaceWidgetBuilder,
+    this.polylines = const {},
+    this.notSelectedPlaceWidgetBuilder,
   })  : assert(polygonValidation == null || circleValidation == null),
         super(key: key);
 
@@ -224,6 +225,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
           compassEnabled: false,
           mapToolbarEnabled: false,
           initialCameraPosition: widget.initialCameraPosition,
+          minMaxZoomPreference: const MinMaxZoomPreference(null, 16),
           mapType: data.item1,
           myLocationEnabled: true,
           circles: <Circle>{
