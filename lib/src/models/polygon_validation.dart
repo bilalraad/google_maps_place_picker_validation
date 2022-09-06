@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'package:google_maps_place_picker_validation/src/models/shape_validation.dart';
 import 'package:map_utils/polygon_extension.dart';
-
 import 'package:uuid/uuid.dart';
 
 class PolygonValidation extends Polygon implements ShapeValidation {
@@ -24,6 +22,18 @@ class PolygonValidation extends Polygon implements ShapeValidation {
           points: points,
           strokeWidth: strokeWidth,
         );
+
+  Polygon copyWithValidation({
+    bool? validation,
+  }) {
+    return PolygonValidation(
+      points: points,
+      fillColor: fillColor,
+      strokeColor: strokeColor,
+      strokeWidth: strokeWidth,
+      validation: validation ?? this.validation,
+    );
+  }
 
   @override
   bool checkIsValid(LatLng point) {
