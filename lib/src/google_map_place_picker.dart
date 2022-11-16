@@ -46,6 +46,7 @@ class GoogleMapPlacePicker extends StatefulWidget {
 
   final bool usePinPointingSearch;
   final bool? usePlaceDetailSearch;
+  final bool? useGeocoding;
 
   final bool? selectInitialPosition;
 
@@ -97,6 +98,7 @@ class GoogleMapPlacePicker extends StatefulWidget {
     this.onMyLocation,
     this.onPlacePicked,
     this.usePlaceDetailSearch,
+    this.useGeocoding,
     this.selectInitialPosition,
     this.language,
     this.circleValidation,
@@ -141,6 +143,12 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
       provider.placeSearchingState = SearchingState.Idle;
       return;
     }
+    if (!widget.useGeocoding!) {
+      provider.placeSearchingState = SearchingState.Idle;
+      provider.selectedPlace =
+          PickResult.fromLatLang(provider.cameraPosition!.target);
+      return;
+    }
 
     provider.placeSearchingState = SearchingState.Searching;
 
@@ -154,45 +162,44 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
 
     if (response.errorMessage?.isNotEmpty == true ||
         response.status == "REQUEST_DENIED") {
+      provider.placeSearchingState = SearchingState.Idle;
       if (kDebugMode) {
         print("Camera Location Search Error: ${response.errorMessage!}");
       }
+      widget.onSearchFailed?.call(response.status);
+
+      return;
+    }
+
+    if (!widget.usePlaceDetailSearch!) {
+      provider.placeSearchingState = SearchingState.Idle;
+      provider.selectedPlace =
+          PickResult.fromGeocodingResult(response.results[0]);
+      return;
+    }
+
+    final PlacesDetailsResponse detailResponse =
+        await provider.places.getDetailsByPlaceId(
+      response.results[0].placeId,
+      language: widget.language,
+    );
+
+    if (detailResponse.errorMessage?.isNotEmpty == true ||
+        detailResponse.status == "REQUEST_DENIED") {
+      if (kDebugMode) {
+        print(
+          "Fetching details by placeId Error: ${detailResponse.errorMessage!}",
+        );
+      }
       if (widget.onSearchFailed != null) {
-        widget.onSearchFailed!(response.status);
+        widget.onSearchFailed!(detailResponse.status);
       }
       provider.placeSearchingState = SearchingState.Idle;
       return;
     }
 
-    if (widget.usePlaceDetailSearch!) {
-      final PlacesDetailsResponse detailResponse =
-          await provider.places.getDetailsByPlaceId(
-        response.results[0].placeId,
-        language: widget.language,
-      );
-
-      if (detailResponse.errorMessage?.isNotEmpty == true ||
-          detailResponse.status == "REQUEST_DENIED") {
-        if (kDebugMode) {
-          print(
-            "Fetching details by placeId Error: ${detailResponse.errorMessage!}",
-          );
-        }
-        if (widget.onSearchFailed != null) {
-          widget.onSearchFailed!(detailResponse.status);
-        }
-        provider.placeSearchingState = SearchingState.Idle;
-        return;
-      }
-
-      provider.selectedPlace =
-          PickResult.fromPlaceDetailResult(detailResponse.result);
-    } else {
-      provider.selectedPlace =
-          PickResult.fromGeocodingResult(response.results[0]);
-    }
-
-    provider.placeSearchingState = SearchingState.Idle;
+    provider.selectedPlace =
+        PickResult.fromPlaceDetailResult(detailResponse.result);
   }
 
   @override

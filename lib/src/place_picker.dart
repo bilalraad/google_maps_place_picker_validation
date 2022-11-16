@@ -54,6 +54,7 @@ class PlacePicker extends StatefulWidget {
     this.enableMyLocationButton = true,
     this.myLocationButtonCooldown = 10,
     this.usePinPointingSearch = true,
+    this.useGeocoding = true,
     this.usePlaceDetailSearch = false,
     this.autocompleteOffset,
     this.autocompleteRadius,
@@ -110,6 +111,7 @@ class PlacePicker extends StatefulWidget {
 
   final bool usePinPointingSearch;
   final bool usePlaceDetailSearch;
+  final bool useGeocoding;
 
   final num? autocompleteOffset;
   final num? autocompleteRadius;
@@ -514,6 +516,7 @@ class _PlacePickerState extends State<PlacePicker> {
       enableMyLocationButton: widget.enableMyLocationButton,
       usePinPointingSearch: widget.usePinPointingSearch,
       usePlaceDetailSearch: widget.usePlaceDetailSearch,
+      useGeocoding: widget.useGeocoding,
       onMapCreated: widget.onMapCreated,
       selectInitialPosition: widget.selectInitialPosition,
       language: widget.autocompleteLanguage,

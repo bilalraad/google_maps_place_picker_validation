@@ -79,6 +79,17 @@ class PickResult {
     );
   }
 
+  factory PickResult.fromLatLang(LatLng result) {
+    return PickResult(
+      geometry: Geometry(
+        location: Location(
+          lat: result.latitude,
+          lng: result.longitude,
+        ),
+      ),
+    );
+  }
+
   factory PickResult.fromPlaceDetailResult(PlaceDetails result) {
     return PickResult(
       placeId: result.placeId,
