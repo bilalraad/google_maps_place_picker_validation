@@ -144,9 +144,9 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
       return;
     }
     if (!widget.useGeocoding!) {
-      provider.placeSearchingState = SearchingState.Idle;
       provider.selectedPlace =
           PickResult.fromLatLang(provider.cameraPosition!.target);
+      provider.placeSearchingState = SearchingState.Idle;
       return;
     }
 
@@ -172,9 +172,9 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
     }
 
     if (!widget.usePlaceDetailSearch!) {
-      provider.placeSearchingState = SearchingState.Idle;
       provider.selectedPlace =
           PickResult.fromGeocodingResult(response.results[0]);
+      provider.placeSearchingState = SearchingState.Idle;
       return;
     }
 
@@ -200,6 +200,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
 
     provider.selectedPlace =
         PickResult.fromPlaceDetailResult(detailResponse.result);
+    provider.placeSearchingState = SearchingState.Idle;
   }
 
   @override
