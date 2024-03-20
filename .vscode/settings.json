@@ -1,19 +1,20 @@
 {
-	"dart.flutterSdkPath": ".fvm/flutter_sdk",
-	"dart.sdkPath": ".fvm/flutter_sdk",
-	"search.exclude": {
-		"**/.fvm": true
-	},
-	"files.watcherExclude": {
-		"**/.fvm": true
-	},
-	"cSpell.words": [
-		"ambiguate",
-		"Cooldown",
-		"Polyline",
-		"polylines",
-		"showintro",
-		"strictbounds",
-		"webservice"
-	],
+  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+  "dart.sdkPath": ".fvm/flutter_sdk",
+  "search.exclude": {
+    "**/.fvm": true
+  },
+  "files.watcherExclude": {
+    "**/.fvm": true
+  },
+  "cSpell.words": [
+    "ambiguate",
+    "Cooldown",
+    "Polyline",
+    "polylines",
+    "showintro",
+    "strictbounds",
+    "webservice",
+    "webservices"
+  ]
 }

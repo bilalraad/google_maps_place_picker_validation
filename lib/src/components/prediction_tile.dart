@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_webservice/places.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 
 class PredictionTile extends StatelessWidget {
   final Prediction prediction;
@@ -27,7 +27,7 @@ class PredictionTile extends StatelessWidget {
 
   List<TextSpan> _buildPredictionText(BuildContext context) {
     final List<TextSpan> result = <TextSpan>[];
-    final textColor = Theme.of(context).textTheme.bodyText2!.color;
+    final textColor = Theme.of(context).textTheme.bodyMedium!.color;
 
     if (prediction.matchedSubstrings.isNotEmpty) {
       MatchedSubstring matchedSubString = prediction.matchedSubstrings[0];

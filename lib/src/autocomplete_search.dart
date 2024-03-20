@@ -6,7 +6,7 @@ import 'package:google_maps_place_picker_validation/providers/place_provider.dar
 import 'package:google_maps_place_picker_validation/providers/search_provider.dart';
 import 'package:google_maps_place_picker_validation/src/components/prediction_tile.dart';
 import 'package:google_maps_place_picker_validation/src/controllers/autocomplete_search_controller.dart';
-import 'package:google_maps_webservice/places.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:provider/provider.dart';
 
 class AutoCompleteSearch extends StatefulWidget {
@@ -244,7 +244,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
       ),
     );
 
-    Overlay.of(context)!.insert(overlayEntry!);
+    Overlay.of(context).insert(overlayEntry!);
   }
 
   Widget _buildSearchingOverlay() {

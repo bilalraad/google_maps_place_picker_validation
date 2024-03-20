@@ -9,7 +9,7 @@ import 'package:google_maps_place_picker_validation/providers/place_provider.dar
 import 'package:google_maps_place_picker_validation/src/components/animated_pin.dart';
 import 'package:google_maps_place_picker_validation/src/models/shape_validation.dart';
 import 'package:google_maps_place_picker_validation/utils/position_extension.dart';
-import 'package:google_maps_webservice/places.dart';
+import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -387,10 +387,10 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
     } else if (state == PinState.Idle) {
       return Stack(
         children: <Widget>[
-          Center(
+          const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 Icon(Icons.place, size: 36, color: Colors.red),
                 SizedBox(height: 42),
               ],
@@ -411,10 +411,10 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
     } else {
       return Stack(
         children: <Widget>[
-          Center(
+          const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const <Widget>[
+              children: <Widget>[
                 AnimatedPin(
                   child: Icon(Icons.place, size: 36, color: Colors.red),
                 ),
