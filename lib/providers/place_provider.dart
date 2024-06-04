@@ -12,7 +12,8 @@ import 'package:google_maps_place_picker_validation/src/place_picker.dart';
 import 'package:flutter_google_maps_webservices/geocoding.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:http/http.dart';
-import 'package:location/location.dart' as _location;
+import 'package:permission_handler/permission_handler.dart';
+// import 'package:location/location.dart' as _location;
 import 'package:provider/provider.dart';
 
 class PlaceProvider extends ChangeNotifier {
@@ -47,24 +48,28 @@ class PlaceProvider extends ChangeNotifier {
   LocationAccuracy? desiredAccuracy;
   bool isAutoCompleteSearching = false;
 
-  _location.Location location = _location.Location();
-  _location.PermissionStatus permissionGranted =
-      _location.PermissionStatus.denied;
+  // _location.Location location = _location.Location();
+  PermissionStatus permissionGranted = PermissionStatus.denied;
   bool isLocationServiceEnabled = false;
 
   Future<void> updateCurrentLocation(bool forceAndroidLocationManager) async {
-    isLocationServiceEnabled = await location.serviceEnabled();
+    final status = await requestLocationPermission();
+
+    isLocationServiceEnabled = status.isGranted || status.isLimited;
 
     if (!isLocationServiceEnabled) {
-      isLocationServiceEnabled = await location.requestService();
+      final permission = await Geolocator.requestPermission();
+      isLocationServiceEnabled = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
       if (!isLocationServiceEnabled) {
         return;
       }
     }
-    permissionGranted = await location.hasPermission();
+    permissionGranted = await requestLocationPermission();
     try {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted == _location.PermissionStatus.granted) {
+      permissionGranted = await requestLocationPermission();
+
+      if (permissionGranted == PermissionStatus.granted) {
         currentPosition = await Geolocator.getCurrentPosition(
             desiredAccuracy: desiredAccuracy ?? LocationAccuracy.best);
       } else {
@@ -78,6 +83,10 @@ class PlaceProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  Future<PermissionStatus> requestLocationPermission() async {
+    return await Permission.location.request();
   }
 
   Position? _currentPosition;

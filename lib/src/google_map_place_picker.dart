@@ -561,7 +561,7 @@ class _GoogleMapPlacePickerState extends State<GoogleMapPlacePicker> {
         widget.polygonValidation?.checkIsValid(result.latLng!) ??
         true;
 
-    MaterialStateColor buttonColor = MaterialStateColor.resolveWith(
+    WidgetStateColor buttonColor = WidgetStateColor.resolveWith(
       (states) => canBePicked ? Colors.lightGreen : Colors.red,
     );
 
